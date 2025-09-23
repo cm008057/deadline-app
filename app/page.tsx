@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { contactsApi, isSupabaseConfigured, DbContact } from '../lib/supabase';
 
 type ContactStatus = 'pending' | 'completed';
+type ContactCategory = 'advisor' | 'agency' | 'customer' | 'other';
 type NextAction = 'schedule' | 'remove' | null;
 
 interface Contact {
@@ -12,6 +13,7 @@ interface Contact {
   purpose: string;
   deadline: string;
   status: ContactStatus;
+  category: ContactCategory;
   createdAt: string;
   completedAt?: string;
   recurring?: string; // 'daily' | 'weekly' | 'monthly' | 'custom'
@@ -22,6 +24,9 @@ export default function Home() {
   const [name, setName] = useState('');
   const [purpose, setPurpose] = useState('');
   const [deadline, setDeadline] = useState('');
+  const [category, setCategory] = useState<ContactCategory>('customer');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<ContactCategory | 'all'>('all');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [useDatabase] = useState(() => isSupabaseConfigured());
@@ -43,6 +48,7 @@ export default function Home() {
         purpose: dbContact.purpose,
         deadline: dbContact.deadline,
         status: dbContact.status,
+        category: dbContact.category || 'customer',
         createdAt: dbContact.created_at || '',
         completedAt: dbContact.completed_at || undefined,
         recurring: dbContact.recurring
@@ -52,7 +58,11 @@ export default function Home() {
       // LocalStorageから読み込み
       const stored = localStorage.getItem('contacts');
       if (stored) {
-        setContacts(JSON.parse(stored));
+        const parsedContacts = JSON.parse(stored).map((contact: any) => ({
+          ...contact,
+          category: contact.category || 'customer'
+        }));
+        setContacts(parsedContacts);
       }
     }
 
@@ -81,7 +91,8 @@ export default function Home() {
         name,
         purpose,
         deadline,
-        status: 'pending'
+        status: 'pending',
+        category
       });
 
       if (dbContact) {
@@ -91,6 +102,7 @@ export default function Home() {
           purpose: dbContact.purpose,
           deadline: dbContact.deadline,
           status: dbContact.status,
+          category: dbContact.category || 'customer',
           createdAt: dbContact.created_at || '',
           completedAt: dbContact.completed_at || undefined,
           recurring: dbContact.recurring
@@ -105,6 +117,7 @@ export default function Home() {
         purpose,
         deadline,
         status: 'pending',
+        category,
         createdAt: new Date().toISOString(),
       };
       setContacts([...contacts, newContact]);
@@ -113,6 +126,7 @@ export default function Home() {
     setName('');
     setPurpose('');
     setDeadline('');
+    setCategory('customer');
     setLoading(false);
   };
 
@@ -196,23 +210,35 @@ export default function Home() {
     setEditingId(null);
   };
 
-  // ソート（本日が上位）
-  const sortedContacts = [...contacts].sort((a, b) => {
-    const today = new Date().toDateString();
-    const aDate = new Date(a.deadline).toDateString();
-    const bDate = new Date(b.deadline).toDateString();
+  // フィルタリングとソート
+  const filteredAndSortedContacts = [...contacts]
+    .filter(contact => {
+      // 検索フィルタ
+      const matchesSearch = !searchTerm ||
+        contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        contact.purpose.toLowerCase().includes(searchTerm.toLowerCase());
 
-    // 完了済みは下位
-    if (a.status === 'completed' && b.status === 'pending') return 1;
-    if (a.status === 'pending' && b.status === 'completed') return -1;
+      // カテゴリフィルタ
+      const matchesCategory = selectedCategory === 'all' || (contact.category || 'customer') === selectedCategory;
 
-    // 本日分を最上位
-    if (aDate === today && bDate !== today) return -1;
-    if (aDate !== today && bDate === today) return 1;
+      return matchesSearch && matchesCategory;
+    })
+    .sort((a, b) => {
+      const today = new Date().toDateString();
+      const aDate = new Date(a.deadline).toDateString();
+      const bDate = new Date(b.deadline).toDateString();
 
-    // 期日順
-    return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
-  });
+      // 完了済みは下位
+      if (a.status === 'completed' && b.status === 'pending') return 1;
+      if (a.status === 'pending' && b.status === 'completed') return -1;
+
+      // 本日分を最上位
+      if (aDate === today && bDate !== today) return -1;
+      if (aDate !== today && bDate === today) return 1;
+
+      // 期日順
+      return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
+    });
 
   // 期日表示フォーマット
   const formatDeadline = (deadline: string) => {
@@ -232,15 +258,83 @@ export default function Home() {
     return formatted;
   };
 
+  // カテゴリ表示用
+  const getCategoryDisplay = (category: ContactCategory | undefined) => {
+    const categories = {
+      advisor: { label: '👨‍💼 顧問', color: 'bg-blue-100 text-blue-800' },
+      agency: { label: '🏢 代理店', color: 'bg-green-100 text-green-800' },
+      customer: { label: '👥 顧客', color: 'bg-purple-100 text-purple-800' },
+      other: { label: '📋 その他', color: 'bg-gray-100 text-gray-800' }
+    };
+    return categories[category || 'customer'];
+  };
+
+  // CSV エクスポート
+  const exportToCSV = () => {
+    if (filteredAndSortedContacts.length === 0) {
+      alert('エクスポートするデータがありません');
+      return;
+    }
+
+    const csvData = filteredAndSortedContacts.map(contact => ({
+      名前: contact.name,
+      目的: contact.purpose,
+      期日: contact.deadline,
+      カテゴリ: getCategoryDisplay(contact.category).label,
+      ステータス: contact.status === 'completed' ? '完了' : '未完了',
+      作成日: new Date(contact.createdAt).toLocaleDateString('ja-JP'),
+      完了日: contact.completedAt ? new Date(contact.completedAt).toLocaleDateString('ja-JP') : '',
+      リピート: contact.recurring || ''
+    }));
+
+    const csvContent = [
+      Object.keys(csvData[0]).join(','),
+      ...csvData.map(row => Object.values(row).map(val => `"${val}"`).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `contacts_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // 統計データ
+  const getStats = () => {
+    const total = contacts.length;
+    const completed = contacts.filter(c => c.status === 'completed').length;
+    const pending = total - completed;
+    const today = contacts.filter(c => new Date(c.deadline).toDateString() === new Date().toDateString()).length;
+    const overdue = contacts.filter(c =>
+      c.status === 'pending' && new Date(c.deadline) < new Date() &&
+      new Date(c.deadline).toDateString() !== new Date().toDateString()
+    ).length;
+
+    const byCategory = {
+      advisor: contacts.filter(c => (c.category || 'customer') === 'advisor').length,
+      agency: contacts.filter(c => (c.category || 'customer') === 'agency').length,
+      customer: contacts.filter(c => (c.category || 'customer') === 'customer').length,
+      other: contacts.filter(c => (c.category || 'customer') === 'other').length,
+    };
+
+    return { total, completed, pending, today, overdue, byCategory };
+  };
+
+  const stats = getStats();
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-4">
+      <div className="max-w-6xl mx-auto px-4">
         <h1 className="text-3xl font-bold mb-8 text-gray-800">期日管理システム</h1>
 
         {/* 入力フォーム */}
         <div className="bg-white rounded-lg shadow p-6 mb-8">
           <h2 className="text-xl font-semibold mb-4">新規登録</h2>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
             <input
               type="text"
               placeholder="名前"
@@ -261,23 +355,91 @@ export default function Home() {
               onChange={(e) => setDeadline(e.target.value)}
               className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value as ContactCategory)}
+              className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="customer">👥 顧客</option>
+              <option value="advisor">👨‍💼 顧問</option>
+              <option value="agency">🏢 代理店</option>
+              <option value="other">📋 その他</option>
+            </select>
             <button
               onClick={handleAdd}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              disabled={loading}
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
             >
-              追加
+              {loading ? '追加中...' : '追加'}
             </button>
+          </div>
+        </div>
+
+        {/* 統計ダッシュボード */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+          <div className="bg-white rounded-lg shadow p-4 text-center">
+            <div className="text-2xl font-bold text-blue-600">{stats.total}</div>
+            <div className="text-sm text-gray-600">総件数</div>
+          </div>
+          <div className="bg-white rounded-lg shadow p-4 text-center">
+            <div className="text-2xl font-bold text-green-600">{stats.completed}</div>
+            <div className="text-sm text-gray-600">完了</div>
+          </div>
+          <div className="bg-white rounded-lg shadow p-4 text-center">
+            <div className="text-2xl font-bold text-orange-600">{stats.pending}</div>
+            <div className="text-sm text-gray-600">未完了</div>
+          </div>
+          <div className="bg-white rounded-lg shadow p-4 text-center">
+            <div className="text-2xl font-bold text-red-600">{stats.today}</div>
+            <div className="text-sm text-gray-600">本日</div>
+          </div>
+          <div className="bg-white rounded-lg shadow p-4 text-center">
+            <div className="text-2xl font-bold text-purple-600">{stats.overdue}</div>
+            <div className="text-sm text-gray-600">期限切れ</div>
+          </div>
+        </div>
+
+        {/* 検索・フィルタ・エクスポート */}
+        <div className="bg-white rounded-lg shadow p-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+            <input
+              type="text"
+              placeholder="🔍 名前・目的で検索"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value as ContactCategory | 'all')}
+              className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">📂 全カテゴリ</option>
+              <option value="advisor">👨‍💼 顧問</option>
+              <option value="agency">🏢 代理店</option>
+              <option value="customer">👥 顧客</option>
+              <option value="other">📋 その他</option>
+            </select>
+            <button
+              onClick={exportToCSV}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+            >
+              📊 CSV出力
+            </button>
+            <div className="text-sm text-gray-600 self-center">
+              {filteredAndSortedContacts.length}件表示
+            </div>
           </div>
         </div>
 
         {/* リスト */}
         <div className="space-y-4">
-          {sortedContacts.length === 0 ? (
+          {filteredAndSortedContacts.length === 0 ? (
             <div className="text-center py-12 text-gray-500">
-              連絡先がありません
+              {searchTerm || selectedCategory !== 'all' ? '条件に一致する連絡先がありません' : '連絡先がありません'}
             </div>
           ) : (
-            sortedContacts.map((contact) => (
+            filteredAndSortedContacts.map((contact) => (
               <div key={contact.id} className={`bg-white rounded-lg shadow p-6 ${
                 contact.status === 'completed' ? 'opacity-60' : ''
               }`}>
@@ -289,8 +451,11 @@ export default function Home() {
                     className="mt-1 w-5 h-5 cursor-pointer"
                   />
                   <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
+                    <div className="flex items-center gap-3 mb-2 flex-wrap">
                       <h3 className="text-lg font-semibold">{contact.name}</h3>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getCategoryDisplay(contact.category).color}`}>
+                        {getCategoryDisplay(contact.category).label}
+                      </span>
                       <span className={`text-sm font-medium ${
                         new Date(contact.deadline).toDateString() === new Date().toDateString()
                           ? 'text-red-600'

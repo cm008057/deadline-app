@@ -20,6 +20,7 @@ export interface DbContact {
   purpose: string;
   deadline: string;
   status: 'pending' | 'completed';
+  category?: 'advisor' | 'agency' | 'customer' | 'other';
   recurring?: string;
   created_at?: string;
   completed_at?: string | null;
