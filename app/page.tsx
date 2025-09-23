@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { contactsApi, isSupabaseConfigured, DbContact } from '../lib/supabase';
+import { useState, useEffect, useCallback } from 'react';
+import { contactsApi, isSupabaseConfigured } from '../lib/supabase';
 
 type ContactStatus = 'pending' | 'completed';
 type ContactCategory = 'advisor' | 'agency' | 'customer' | 'other';
-type NextAction = 'schedule' | 'remove' | null;
 
 interface Contact {
   id: string;
@@ -31,12 +30,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [useDatabase] = useState(() => isSupabaseConfigured());
 
-  // データの読み込み
-  useEffect(() => {
-    loadContacts();
-  }, []);
-
-  const loadContacts = async () => {
+  const loadContacts = useCallback(async () => {
     setLoading(true);
 
     if (useDatabase) {
@@ -58,7 +52,7 @@ export default function Home() {
       // LocalStorageから読み込み
       const stored = localStorage.getItem('contacts');
       if (stored) {
-        const parsedContacts = JSON.parse(stored).map((contact: any) => ({
+        const parsedContacts = JSON.parse(stored).map((contact: Contact) => ({
           ...contact,
           category: contact.category || 'customer'
         }));
@@ -67,7 +61,12 @@ export default function Home() {
     }
 
     setLoading(false);
-  };
+  }, [useDatabase]);
+
+  // データの読み込み
+  useEffect(() => {
+    loadContacts();
+  }, [loadContacts]);
 
   // データの保存（LocalStorageのみ）
   useEffect(() => {
