@@ -15,7 +15,11 @@ CREATE TABLE contacts (
   purpose TEXT NOT NULL,
   deadline DATE NOT NULL,
   status TEXT DEFAULT 'pending',
+  category TEXT DEFAULT 'customer',
   recurring TEXT,
+  recurring_days INTEGER,
+  recurring_weekday INTEGER,
+  order_index INTEGER,
   created_at TIMESTAMP DEFAULT NOW(),
   completed_at TIMESTAMP,
   user_id TEXT

@@ -22,6 +22,9 @@ export interface DbContact {
   status: 'pending' | 'completed';
   category?: 'advisor' | 'agency' | 'customer' | 'other';
   recurring?: string;
+  recurring_days?: number;
+  recurring_weekday?: number;
+  order?: number;
   created_at?: string;
   completed_at?: string | null;
   user_id?: string;
