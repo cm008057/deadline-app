@@ -34,6 +34,7 @@ export default function Home() {
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [customCategories, setCustomCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<ContactCategory | 'all'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [useDatabase] = useState(() => isSupabaseConfigured());
@@ -512,7 +513,12 @@ export default function Home() {
       // カテゴリフィルタ
       const matchesCategory = selectedCategory === 'all' || (contact.category || 'customer') === selectedCategory;
 
-      return matchesCategory;
+      // 検索フィルタ（名前と目的で検索）
+      const matchesSearch = searchQuery === '' ||
+        contact.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        contact.purpose.toLowerCase().includes(searchQuery.toLowerCase());
+
+      return matchesCategory && matchesSearch;
     })
     .sort((a, b) => {
       // 手動ソートモードの場合はスキップ
@@ -652,7 +658,7 @@ export default function Home() {
           <h2 className="text-base sm:text-lg lg:text-xl font-black text-slate-800 mb-3 sm:mb-4">
             📝 新規登録
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 sm:gap-4">
             <div className="relative">
               <input
                 type="text"
@@ -679,7 +685,7 @@ export default function Home() {
                 className="w-full px-3 py-2 sm:px-3 sm:py-2.5 lg:py-2 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all text-xs sm:text-sm lg:text-sm text-gray-800"
               />
             </div>
-            <div className="flex gap-2">
+            <div className="lg:col-span-2 flex gap-2">
               <select
                 value={category}
                 onChange={(e) => {
@@ -687,7 +693,7 @@ export default function Home() {
                   setCategory(val);
                   setShowCustomInput(val === 'other');
                 }}
-                className="px-3 py-2 sm:px-3 sm:py-2.5 lg:py-2 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all text-xs sm:text-sm lg:text-sm text-gray-800 appearance-none cursor-pointer"
+                className="flex-1 px-3 py-2 sm:px-3 sm:py-2.5 lg:py-2 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all text-xs sm:text-sm lg:text-sm text-gray-800 appearance-none cursor-pointer"
               >
                 <option value="customer">👥 顧客</option>
                 <option value="advisor">🎯 顧問</option>
@@ -703,7 +709,7 @@ export default function Home() {
                   placeholder="カテゴリ名入力"
                   value={customCategory}
                   onChange={(e) => setCustomCategory(e.target.value)}
-                  className="px-3 py-2 sm:px-3 sm:py-2.5 lg:py-2 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all text-xs sm:text-sm lg:text-sm text-gray-800 placeholder-gray-400"
+                  className="flex-1 px-3 py-2 sm:px-3 sm:py-2.5 lg:py-2 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all text-xs sm:text-sm lg:text-sm text-gray-800 placeholder-gray-400"
                 />
               )}
             </div>
@@ -723,6 +729,13 @@ export default function Home() {
         <div className="bg-white/80 backdrop-blur-lg rounded-2xl sm:rounded-3xl shadow-lg border border-white/20 p-3 sm:p-4 lg:p-6 mb-4 sm:mb-6">
           <div className="flex flex-wrap gap-3 items-center justify-between">
             <div className="flex flex-wrap gap-3">
+              <input
+                type="text"
+                placeholder="🔍 名前や目的で検索..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="px-3 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm bg-white border border-gray-200 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium text-gray-700 placeholder-gray-400"
+              />
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value as ContactCategory | 'all')}
@@ -772,7 +785,7 @@ export default function Home() {
                 <div className="text-navy-300 text-6xl mb-4">📅</div>
                 <h3 className="text-xl sm:text-2xl font-bold text-navy-700 mb-2">連絡先がありません</h3>
                 <p className="text-navy-500">
-                  {selectedCategory !== 'all' ? '条件に一致する連絡先がありません' : '新しい連絡先を追加してみましょう'}
+                  {(selectedCategory !== 'all' || searchQuery !== '') ? '条件に一致する連絡先がありません' : '新しい連絡先を追加してみましょう'}
                 </p>
               </div>
             ) : (
