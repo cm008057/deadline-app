@@ -6,7 +6,7 @@ import { contactsApi, isSupabaseConfigured, supabase } from '../lib/supabase';
 import type { User } from '@supabase/supabase-js';
 
 type ContactStatus = 'pending' | 'completed';
-type ContactCategory = 'advisor' | 'agency' | 'customer' | 'other';
+type ContactCategory = 'advisor' | 'agency' | 'customer' | 'other' | string;
 
 interface Contact {
   id: string;
@@ -15,6 +15,7 @@ interface Contact {
   deadline: string;
   status: ContactStatus;
   category: ContactCategory;
+  customCategory?: string; // カスタムカテゴリー名
   createdAt: string;
   completedAt?: string;
   recurring?: string;
@@ -29,6 +30,9 @@ export default function Home() {
   const [purpose, setPurpose] = useState('');
   const [deadline, setDeadline] = useState('');
   const [category, setCategory] = useState<ContactCategory>('customer');
+  const [customCategory, setCustomCategory] = useState('');
+  const [showCustomInput, setShowCustomInput] = useState(false);
+  const [customCategories, setCustomCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<ContactCategory | 'all'>('all');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -147,6 +151,12 @@ export default function Home() {
         }));
         setContacts(parsedContacts);
       }
+    }
+
+    // カスタムカテゴリを読み込み
+    const storedCategories = localStorage.getItem('customCategories');
+    if (storedCategories) {
+      setCustomCategories(JSON.parse(storedCategories));
     }
 
     setLoading(false);
@@ -338,6 +348,15 @@ export default function Home() {
       return;
     }
 
+    // カスタムカテゴリの処理
+    if (category === 'other' && customCategory && !customCategories.includes(customCategory)) {
+      const newCategories = [...customCategories, customCategory];
+      setCustomCategories(newCategories);
+      localStorage.setItem('customCategories', JSON.stringify(newCategories));
+    }
+
+    const finalCategory = category === 'other' ? (customCategory || 'other') : category;
+
     setLoading(true);
 
     if (useDatabase) {
@@ -347,7 +366,7 @@ export default function Home() {
         purpose,
         deadline,
         status: 'pending',
-        category,
+        category: finalCategory,
         user_id: user?.id
       });
 
@@ -359,6 +378,7 @@ export default function Home() {
           deadline: dbContact.deadline,
           status: dbContact.status,
           category: dbContact.category || 'customer',
+          customCategory: category === 'other' ? customCategory : undefined,
           createdAt: dbContact.created_at || '',
           completedAt: dbContact.completed_at || undefined,
           recurring: dbContact.recurring
@@ -373,7 +393,8 @@ export default function Home() {
         purpose,
         deadline,
         status: 'pending',
-        category,
+        category: finalCategory,
+        customCategory: category === 'other' ? customCategory : undefined,
         createdAt: new Date().toISOString(),
       };
       setContacts([...contacts, newContact]);
@@ -383,6 +404,8 @@ export default function Home() {
     setPurpose('');
     setDeadline('');
     setCategory('customer');
+    setCustomCategory('');
+    setShowCustomInput(false);
     setLoading(false);
   };
 
@@ -530,13 +553,23 @@ export default function Home() {
   };
 
   // カテゴリ表示用
-  const getCategoryDisplay = (category: ContactCategory | undefined) => {
-    const categories = {
+  const getCategoryDisplay = (category: ContactCategory | undefined, customName?: string) => {
+    const categories: Record<string, { label: string; emoji: string; color: string }> = {
       advisor: { label: '顧問', emoji: '🎯', color: 'bg-gradient-to-r from-blue-600 to-blue-700 text-white' },
       agency: { label: '代理店', emoji: '🏢', color: 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white' },
       customer: { label: '顧客', emoji: '👥', color: 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white' },
       other: { label: 'その他', emoji: '📌', color: 'bg-gradient-to-r from-gray-600 to-slate-600 text-white' }
     };
+
+    // カスタムカテゴリの場合
+    if (category && !['advisor', 'agency', 'customer', 'other'].includes(category)) {
+      return {
+        label: category,
+        emoji: '🏷️',
+        color: 'bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white'
+      };
+    }
+
     return categories[category || 'customer'];
   };
 
@@ -646,16 +679,34 @@ export default function Home() {
                 className="w-full px-3 py-2 sm:px-3 sm:py-2.5 lg:py-2 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all text-xs sm:text-sm lg:text-sm text-gray-800"
               />
             </div>
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value as ContactCategory)}
-              className="px-3 py-2 sm:px-3 sm:py-2.5 lg:py-2 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all text-xs sm:text-sm lg:text-sm text-gray-800 appearance-none cursor-pointer"
-            >
-              <option value="customer">👥 顧客</option>
-              <option value="advisor">🎯 顧問</option>
-              <option value="agency">🏢 代理店</option>
-              <option value="other">📌 その他</option>
-            </select>
+            <div className="flex gap-2">
+              <select
+                value={category}
+                onChange={(e) => {
+                  const val = e.target.value as ContactCategory;
+                  setCategory(val);
+                  setShowCustomInput(val === 'other');
+                }}
+                className="px-3 py-2 sm:px-3 sm:py-2.5 lg:py-2 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all text-xs sm:text-sm lg:text-sm text-gray-800 appearance-none cursor-pointer"
+              >
+                <option value="customer">👥 顧客</option>
+                <option value="advisor">🎯 顧問</option>
+                <option value="agency">🏢 代理店</option>
+                <option value="other">📌 その他（新規追加）</option>
+                {customCategories.map(cat => (
+                  <option key={cat} value={cat}>🏷️ {cat}</option>
+                ))}
+              </select>
+              {showCustomInput && (
+                <input
+                  type="text"
+                  placeholder="カテゴリ名入力"
+                  value={customCategory}
+                  onChange={(e) => setCustomCategory(e.target.value)}
+                  className="px-3 py-2 sm:px-3 sm:py-2.5 lg:py-2 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all text-xs sm:text-sm lg:text-sm text-gray-800 placeholder-gray-400"
+                />
+              )}
+            </div>
             <button
               onClick={handleAdd}
               disabled={loading}
@@ -682,6 +733,9 @@ export default function Home() {
                 <option value="agency">🏢 代理店のみ</option>
                 <option value="customer">👥 顧客のみ</option>
                 <option value="other">📌 その他のみ</option>
+                {customCategories.map(cat => (
+                  <option key={cat} value={cat}>🏷️ {cat}のみ</option>
+                ))}
               </select>
               <button
                 onClick={() => setViewMode(viewMode === 'list' ? 'kanban' : 'list')}
@@ -766,9 +820,12 @@ export default function Home() {
                             className="px-3 py-2 border-2 border-navy-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-navy-500 focus:border-navy-500 transition-all"
                           >
                             <option value="customer">👥 顧客</option>
-                            <option value="advisor">👨‍💼 顧問</option>
+                            <option value="advisor">🎯 顧問</option>
                             <option value="agency">🏢 代理店</option>
-                            <option value="other">📋 その他</option>
+                            <option value="other">📌 その他</option>
+                            {customCategories.map(cat => (
+                              <option key={cat} value={cat}>🏷️ {cat}</option>
+                            ))}
                           </select>
                         </div>
                         <div className="flex gap-2">
