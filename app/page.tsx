@@ -442,33 +442,33 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900">
       {/* ヘッダー */}
       <div className="bg-gradient-to-r from-slate-800 via-blue-800 to-indigo-800 text-white border-b border-blue-700/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="max-w-7xl mx-auto px-4 py-6 sm:py-8 lg:py-10">
           <div className="text-center">
-            <h1 className="text-5xl font-black text-white mb-4 tracking-tight">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white mb-2 tracking-tight">
               期日管理システム
             </h1>
-            <p className="text-xl text-blue-100 font-light max-w-2xl mx-auto">
+            <p className="text-sm sm:text-base lg:text-lg text-blue-100 font-light max-w-2xl mx-auto">
               顧問・代理店・顧客との連絡を効率的に管理
             </p>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8">
 
         {/* 入力フォーム */}
-        <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8 mb-8">
-          <h2 className="text-2xl font-black text-slate-800 mb-8">
+        <div className="bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-xl border border-white/20 p-4 sm:p-6 lg:p-8 mb-4 sm:mb-6">
+          <h2 className="text-lg sm:text-xl lg:text-2xl font-black text-slate-800 mb-4 sm:mb-6">
             📝 新規登録
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
             <div className="relative">
               <input
                 type="text"
                 placeholder="お名前"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all text-gray-800 placeholder-gray-400"
+                className="w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-gray-50 border border-gray-200 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-2 sm:focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all text-sm sm:text-base text-gray-800 placeholder-gray-400"
               />
             </div>
             <div className="relative">
@@ -477,7 +477,7 @@ export default function Home() {
                 placeholder="連絡の目的"
                 value={purpose}
                 onChange={(e) => setPurpose(e.target.value)}
-                className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all text-gray-800 placeholder-gray-400"
+                className="w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-gray-50 border border-gray-200 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-2 sm:focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all text-sm sm:text-base text-gray-800 placeholder-gray-400"
               />
             </div>
             <div className="relative">
@@ -491,7 +491,7 @@ export default function Home() {
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value as ContactCategory)}
-              className="px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all text-gray-800 appearance-none cursor-pointer"
+              className="px-3 py-2.5 sm:px-4 sm:py-3 bg-gray-50 border border-gray-200 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-2 sm:focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all text-sm sm:text-base text-gray-800 appearance-none cursor-pointer"
             >
               <option value="customer">👥 顧客</option>
               <option value="advisor">🎯 顧問</option>
@@ -501,7 +501,7 @@ export default function Home() {
             <button
               onClick={handleAdd}
               disabled={loading}
-              className="relative px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-lg rounded-2xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 disabled:opacity-50 shadow-xl hover:shadow-2xl hover:scale-105 transform"
+              className="relative px-4 py-2.5 sm:px-6 sm:py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-sm sm:text-base rounded-xl sm:rounded-2xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 disabled:opacity-50 shadow-lg hover:shadow-xl sm:hover:scale-105 transform"
             >
               <span className="relative z-10">
                 {loading ? '追加中...' : '予定を追加'}
@@ -511,13 +511,13 @@ export default function Home() {
         </div>
 
         {/* フィルタ・表示モード切替 */}
-        <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-xl border border-white/20 p-6 mb-8">
+        <div className="bg-white/80 backdrop-blur-lg rounded-2xl sm:rounded-3xl shadow-lg border border-white/20 p-3 sm:p-4 lg:p-6 mb-4 sm:mb-6">
           <div className="flex flex-wrap gap-3 items-center justify-between">
             <div className="flex flex-wrap gap-3">
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value as ContactCategory | 'all')}
-                className="px-6 py-3 bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium text-gray-700 cursor-pointer hover:bg-gradient-to-r hover:from-gray-100 hover:to-gray-200"
+                className="px-3 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium text-gray-700 cursor-pointer hover:bg-gradient-to-r hover:from-gray-100 hover:to-gray-200"
               >
                 <option value="all">🎨 全カテゴリ</option>
                 <option value="advisor">🎯 顧問のみ</option>
@@ -527,20 +527,20 @@ export default function Home() {
               </select>
               <button
                 onClick={() => setViewMode(viewMode === 'list' ? 'kanban' : 'list')}
-                className="px-6 py-3 bg-gradient-to-r from-indigo-50 to-purple-50 text-indigo-700 font-semibold rounded-2xl hover:from-indigo-100 hover:to-purple-100 transition-all duration-200 border border-indigo-200/50"
+                className="px-3 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm bg-gradient-to-r from-indigo-50 to-purple-50 text-indigo-700 font-semibold rounded-xl sm:rounded-2xl hover:from-indigo-100 hover:to-purple-100 transition-all duration-200 border border-indigo-200/50"
               >
                 {viewMode === 'list' ? '📊 ボード表示' : '📋 リスト表示'}
               </button>
               <button
                 onClick={() => setSortMode(sortMode === 'auto' ? 'manual' : 'auto')}
-                className="px-6 py-3 bg-gradient-to-r from-purple-50 to-pink-50 text-purple-700 font-semibold rounded-2xl hover:from-purple-100 hover:to-pink-100 transition-all duration-200 border border-purple-200/50"
+                className="px-3 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm bg-gradient-to-r from-purple-50 to-pink-50 text-purple-700 font-semibold rounded-xl sm:rounded-2xl hover:from-purple-100 hover:to-pink-100 transition-all duration-200 border border-purple-200/50"
               >
                 {sortMode === 'auto' ? '🔄 手動ソート' : '⚡ 自動ソート'}
               </button>
             </div>
             <button
               onClick={enableNotifications}
-              className={`px-6 py-3 font-semibold rounded-2xl transition-all duration-200 ${
+              className={`px-3 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm font-semibold rounded-xl sm:rounded-2xl transition-all duration-200 ${
                 notificationEnabled
                   ? 'bg-green-100 text-green-700 cursor-not-allowed border border-green-200'
                   : 'bg-gradient-to-r from-amber-400 to-orange-400 text-white hover:from-amber-500 hover:to-orange-500 shadow-lg hover:shadow-xl'
@@ -565,7 +565,7 @@ export default function Home() {
               </div>
             ) : (
             filteredAndSortedContacts.map((contact) => (
-              <div key={contact.id} className={`group bg-white rounded-3xl shadow-lg border border-gray-100 p-7 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 ${
+              <div key={contact.id} className={`group bg-white rounded-xl sm:rounded-2xl shadow-md sm:shadow-lg border border-gray-100 p-4 sm:p-5 lg:p-6 sm:hover:shadow-xl transition-all duration-300 sm:hover:-translate-y-1 ${
                 contact.status === 'completed' ? 'opacity-50 bg-gray-50/50' : ''
               }`}>
                 <div className="flex items-start gap-4">
@@ -632,8 +632,8 @@ export default function Home() {
                       /* 表示モード */
                       <>
                         <div className="flex items-center gap-3 mb-2 flex-wrap">
-                          <h3 className="text-2xl font-black text-gray-800">{contact.name}</h3>
-                          <span className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold ${getCategoryDisplay(contact.category).color} shadow-md`}>
+                          <h3 className="text-lg sm:text-xl lg:text-2xl font-black text-gray-800">{contact.name}</h3>
+                          <span className={`inline-flex items-center gap-1 px-2 py-1 sm:px-3 sm:py-1.5 rounded-full text-xs font-bold ${getCategoryDisplay(contact.category).color} shadow-sm sm:shadow-md`}>
                             <span>{getCategoryDisplay(contact.category).emoji}</span>
                             <span>{getCategoryDisplay(contact.category).label}</span>
                           </span>
@@ -647,19 +647,19 @@ export default function Home() {
                             📅 {formatDeadline(contact.deadline)}
                           </span>
                         </div>
-                        <p className="text-gray-600 text-lg leading-relaxed mt-3">{contact.purpose}</p>
+                        <p className="text-gray-600 text-sm sm:text-base leading-relaxed mt-2 sm:mt-3">{contact.purpose}</p>
 
                         {/* アクションボタン */}
                         <div className="flex gap-2 mt-3">
                           <button
                             onClick={() => startEdit(contact)}
-                            className="px-5 py-2.5 text-sm bg-gradient-to-r from-indigo-50 to-blue-50 text-indigo-700 font-bold rounded-2xl hover:from-indigo-100 hover:to-blue-100 transition-all duration-200 border border-indigo-200/50"
+                            className="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-gradient-to-r from-indigo-50 to-blue-50 text-indigo-700 font-bold rounded-lg sm:rounded-xl hover:from-indigo-100 hover:to-blue-100 transition-all duration-200 border border-indigo-200/50"
                           >
                             ✂️ 編集
                           </button>
                           <button
                             onClick={() => deleteContact(contact.id)}
-                            className="px-5 py-2.5 text-sm bg-gradient-to-r from-red-50 to-pink-50 text-red-700 font-bold rounded-2xl hover:from-red-100 hover:to-pink-100 transition-all duration-200 border border-red-200/50"
+                            className="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-gradient-to-r from-red-50 to-pink-50 text-red-700 font-bold rounded-lg sm:rounded-xl hover:from-red-100 hover:to-pink-100 transition-all duration-200 border border-red-200/50"
                           >
                             🗑️ 削除
                           </button>
@@ -685,12 +685,12 @@ export default function Home() {
 
                     {/* 完了後のアクション選択 */}
                     {contact.status === 'completed' && editingId === contact.id && (
-                      <div className="mt-6 p-6 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl border border-indigo-200/50">
-                        <p className="text-sm font-bold text-indigo-800 mb-4">🎆 完了おめでとう！次のアクションを選択:</p>
+                      <div className="mt-3 sm:mt-4 p-3 sm:p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl sm:rounded-2xl border border-indigo-200/50">
+                        <p className="text-xs sm:text-sm font-bold text-indigo-800 mb-3">🎆 完了おめでとう！次のアクションを選択:</p>
                         <div className="space-y-3">
                           {/* 次回期日設定 */}
                           <div>
-                            <p className="text-sm mb-2">次回期日を設定:</p>
+                            <p className="text-xs sm:text-sm mb-2">次回期日を設定:</p>
                             <div className="flex gap-2 flex-wrap">
                               <button
                                 onClick={() => {
@@ -698,7 +698,7 @@ export default function Home() {
                                   tomorrow.setDate(tomorrow.getDate() + 1);
                                   setNextDeadline(contact.id, tomorrow.toISOString().split('T')[0]);
                                 }}
-                                className="px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-semibold rounded-xl hover:from-blue-600 hover:to-indigo-600 shadow-md hover:shadow-lg transition-all"
+                                className="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-semibold rounded-lg sm:rounded-xl hover:from-blue-600 hover:to-indigo-600 shadow-md hover:shadow-lg transition-all"
                               >
                                 明日
                               </button>
@@ -708,7 +708,7 @@ export default function Home() {
                                   nextWeek.setDate(nextWeek.getDate() + 7);
                                   setNextDeadline(contact.id, nextWeek.toISOString().split('T')[0]);
                                 }}
-                                className="px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-semibold rounded-xl hover:from-blue-600 hover:to-indigo-600 shadow-md hover:shadow-lg transition-all"
+                                className="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-semibold rounded-lg sm:rounded-xl hover:from-blue-600 hover:to-indigo-600 shadow-md hover:shadow-lg transition-all"
                               >
                                 1週間後
                               </button>
@@ -718,7 +718,7 @@ export default function Home() {
                                   nextMonth.setMonth(nextMonth.getMonth() + 1);
                                   setNextDeadline(contact.id, nextMonth.toISOString().split('T')[0]);
                                 }}
-                                className="px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-semibold rounded-xl hover:from-blue-600 hover:to-indigo-600 shadow-md hover:shadow-lg transition-all"
+                                className="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-semibold rounded-lg sm:rounded-xl hover:from-blue-600 hover:to-indigo-600 shadow-md hover:shadow-lg transition-all"
                               >
                                 1ヶ月後
                               </button>
@@ -736,7 +736,7 @@ export default function Home() {
 
                           {/* スケジューリング */}
                           <div>
-                            <p className="text-sm mb-2">定期スケジュール:</p>
+                            <p className="text-xs sm:text-sm mb-2">定期スケジュール:</p>
                             <div className="space-y-2">
                               {/* 基本オプション */}
                               <div className="flex gap-2 flex-wrap">
@@ -746,7 +746,7 @@ export default function Home() {
                                     tomorrow.setDate(tomorrow.getDate() + 1);
                                     setNextDeadline(contact.id, tomorrow.toISOString().split('T')[0], 'daily');
                                   }}
-                                  className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold rounded-xl hover:from-emerald-600 hover:to-teal-600 shadow-md hover:shadow-lg transition-all"
+                                  className="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold rounded-lg sm:rounded-xl hover:from-emerald-600 hover:to-teal-600 shadow-md hover:shadow-lg transition-all"
                                 >
                                   毎日
                                 </button>
@@ -756,7 +756,7 @@ export default function Home() {
                                     nextWeek.setDate(nextWeek.getDate() + 7);
                                     setNextDeadline(contact.id, nextWeek.toISOString().split('T')[0], 'weekly');
                                   }}
-                                  className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold rounded-xl hover:from-emerald-600 hover:to-teal-600 shadow-md hover:shadow-lg transition-all"
+                                  className="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold rounded-lg sm:rounded-xl hover:from-emerald-600 hover:to-teal-600 shadow-md hover:shadow-lg transition-all"
                                 >
                                   毎週
                                 </button>
@@ -766,7 +766,7 @@ export default function Home() {
                                     nextMonth.setMonth(nextMonth.getMonth() + 1);
                                     setNextDeadline(contact.id, nextMonth.toISOString().split('T')[0], 'monthly');
                                   }}
-                                  className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold rounded-xl hover:from-emerald-600 hover:to-teal-600 shadow-md hover:shadow-lg transition-all"
+                                  className="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold rounded-lg sm:rounded-xl hover:from-emerald-600 hover:to-teal-600 shadow-md hover:shadow-lg transition-all"
                                 >
                                   毎月
                                 </button>
@@ -865,9 +865,9 @@ export default function Home() {
           /* カンバンビュー */
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* 本日 */}
-            <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-2xl p-6 border border-red-200">
-              <h3 className="text-xl font-bold text-red-800 mb-6 sticky top-0 bg-gradient-to-r from-red-50 to-red-100 py-3 rounded-xl flex items-center gap-2">
-                <span className="bg-red-200 p-2 rounded-lg">🔴</span>
+            <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-red-200">
+              <h3 className="text-sm sm:text-base font-bold text-red-800 mb-3 sm:mb-4 sticky top-0 bg-gradient-to-r from-red-50 to-red-100 py-2 rounded-lg flex items-center gap-2">
+                <span className="text-lg">🔴</span>
                 本日の連絡
               </h3>
               <div className="space-y-3">
@@ -877,7 +877,7 @@ export default function Home() {
                     return new Date(c.deadline).toDateString() === today && c.status === 'pending';
                   })
                   .map(contact => (
-                    <div key={contact.id} className="bg-white rounded-xl p-4 shadow-md hover:shadow-lg transition-all duration-200 border border-gray-100 animate-fadeInUp">
+                    <div key={contact.id} className="bg-white rounded-lg sm:rounded-xl p-2.5 sm:p-3 shadow-sm sm:shadow-md hover:shadow-lg transition-all duration-200 border border-gray-100">
                       <div className="flex items-start gap-2">
                         <input
                           type="checkbox"
@@ -886,8 +886,8 @@ export default function Home() {
                           className="mt-1 w-4 h-4 cursor-pointer"
                         />
                         <div className="flex-1">
-                          <h4 className="font-bold text-sm text-navy-800">{contact.name}</h4>
-                          <p className="text-xs text-navy-600 mt-1">{contact.purpose}</p>
+                          <h4 className="font-bold text-xs sm:text-sm text-navy-800">{contact.name}</h4>
+                          <p className="text-xs text-navy-600 mt-0.5 sm:mt-1 line-clamp-2">{contact.purpose}</p>
                           <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold mt-2 ${getCategoryDisplay(contact.category).color}`}>
                             {getCategoryDisplay(contact.category).label}
                           </span>
@@ -908,9 +908,9 @@ export default function Home() {
             </div>
 
             {/* 期限切れ */}
-            <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl p-6 border border-orange-200">
-              <h3 className="text-xl font-bold text-orange-800 mb-6 sticky top-0 bg-gradient-to-r from-orange-50 to-orange-100 py-3 rounded-xl flex items-center gap-2">
-                <span className="bg-orange-200 p-2 rounded-lg">⚠️</span>
+            <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-orange-200">
+              <h3 className="text-sm sm:text-base font-bold text-orange-800 mb-3 sm:mb-4 sticky top-0 bg-gradient-to-r from-orange-50 to-orange-100 py-2 rounded-lg flex items-center gap-2">
+                <span className="text-lg">⚠️</span>
                 期限切れ
               </h3>
               <div className="space-y-3">
@@ -921,7 +921,7 @@ export default function Home() {
                     return deadline < today && deadline.toDateString() !== today.toDateString() && c.status === 'pending';
                   })
                   .map(contact => (
-                    <div key={contact.id} className="bg-white rounded-xl p-4 shadow-md hover:shadow-lg transition-all duration-200 border border-gray-100 animate-fadeInUp">
+                    <div key={contact.id} className="bg-white rounded-lg sm:rounded-xl p-2.5 sm:p-3 shadow-sm sm:shadow-md hover:shadow-lg transition-all duration-200 border border-gray-100">
                       <div className="flex items-start gap-2">
                         <input
                           type="checkbox"
@@ -930,8 +930,8 @@ export default function Home() {
                           className="mt-1 w-4 h-4 cursor-pointer"
                         />
                         <div className="flex-1">
-                          <h4 className="font-bold text-sm text-navy-800">{contact.name}</h4>
-                          <p className="text-xs text-navy-600 mt-1">{contact.purpose}</p>
+                          <h4 className="font-bold text-xs sm:text-sm text-navy-800">{contact.name}</h4>
+                          <p className="text-xs text-navy-600 mt-0.5 sm:mt-1 line-clamp-2">{contact.purpose}</p>
                           <p className="text-xs text-orange-700 font-bold mt-1">
                             {new Date(contact.deadline).toLocaleDateString('ja-JP')}
                           </p>
@@ -956,9 +956,9 @@ export default function Home() {
             </div>
 
             {/* 今後の予定 */}
-            <div className="bg-gradient-to-br from-navy-50 to-navy-100 rounded-2xl p-6 border border-navy-200">
-              <h3 className="text-xl font-bold text-navy-800 mb-6 sticky top-0 bg-gradient-to-r from-navy-50 to-navy-100 py-3 rounded-xl flex items-center gap-2">
-                <span className="bg-navy-200 p-2 rounded-lg">📅</span>
+            <div className="bg-gradient-to-br from-navy-50 to-navy-100 rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-navy-200">
+              <h3 className="text-sm sm:text-base font-bold text-navy-800 mb-3 sm:mb-4 sticky top-0 bg-gradient-to-r from-navy-50 to-navy-100 py-2 rounded-lg flex items-center gap-2">
+                <span className="text-lg">📅</span>
                 今後の予定
               </h3>
               <div className="space-y-3">
@@ -969,7 +969,7 @@ export default function Home() {
                     return deadline > today && c.status === 'pending';
                   })
                   .map(contact => (
-                    <div key={contact.id} className="bg-white rounded-xl p-4 shadow-md hover:shadow-lg transition-all duration-200 border border-gray-100 animate-fadeInUp">
+                    <div key={contact.id} className="bg-white rounded-lg sm:rounded-xl p-2.5 sm:p-3 shadow-sm sm:shadow-md hover:shadow-lg transition-all duration-200 border border-gray-100">
                       <div className="flex items-start gap-2">
                         <input
                           type="checkbox"
@@ -978,8 +978,8 @@ export default function Home() {
                           className="mt-1 w-4 h-4 cursor-pointer"
                         />
                         <div className="flex-1">
-                          <h4 className="font-bold text-sm text-navy-800">{contact.name}</h4>
-                          <p className="text-xs text-navy-600 mt-1">{contact.purpose}</p>
+                          <h4 className="font-bold text-xs sm:text-sm text-navy-800">{contact.name}</h4>
+                          <p className="text-xs text-navy-600 mt-0.5 sm:mt-1 line-clamp-2">{contact.purpose}</p>
                           <p className="text-xs text-navy-700 font-bold mt-1">
                             {new Date(contact.deadline).toLocaleDateString('ja-JP')}
                           </p>
