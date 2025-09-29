@@ -587,13 +587,13 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900">
       {/* ヘッダー */}
       <div className="bg-gradient-to-r from-slate-800 via-blue-800 to-indigo-800 text-white border-b border-blue-700/50">
-        <div className="max-w-7xl mx-auto px-4 py-6 sm:py-8 lg:py-10">
+        <div className="max-w-6xl mx-auto px-4 py-4 sm:py-5 lg:py-6">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
             <div className="text-center sm:text-left sm:flex-1">
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white mb-2 tracking-tight">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-white mb-1 tracking-tight">
                 期日管理システム
               </h1>
-              <p className="text-sm sm:text-base lg:text-lg text-blue-100 font-light">
+              <p className="text-xs sm:text-sm lg:text-base text-blue-100 font-light">
                 顧問・代理店・顧客との連絡を効率的に管理
               </p>
             </div>
@@ -612,11 +612,11 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8">
+      <div className="max-w-6xl mx-auto px-3 sm:px-4 lg:px-5 py-3 sm:py-4 lg:py-5">
 
         {/* 入力フォーム */}
-        <div className="bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-xl border border-white/20 p-4 sm:p-6 lg:p-8 mb-4 sm:mb-6">
-          <h2 className="text-lg sm:text-xl lg:text-2xl font-black text-slate-800 mb-4 sm:mb-6">
+        <div className="bg-white/95 backdrop-blur-xl rounded-xl sm:rounded-2xl shadow-xl border border-white/20 p-3 sm:p-4 lg:p-5 mb-3 sm:mb-4">
+          <h2 className="text-base sm:text-lg lg:text-xl font-black text-slate-800 mb-3 sm:mb-4">
             📝 新規登録
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
@@ -626,7 +626,7 @@ export default function Home() {
                 placeholder="お名前"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-gray-50 border border-gray-200 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-2 sm:focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all text-sm sm:text-base text-gray-800 placeholder-gray-400"
+                className="w-full px-3 py-2 sm:px-3 sm:py-2.5 lg:py-2 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all text-xs sm:text-sm lg:text-sm text-gray-800 placeholder-gray-400"
               />
             </div>
             <div className="relative">
@@ -635,7 +635,7 @@ export default function Home() {
                 placeholder="連絡の目的"
                 value={purpose}
                 onChange={(e) => setPurpose(e.target.value)}
-                className="w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-gray-50 border border-gray-200 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-2 sm:focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all text-sm sm:text-base text-gray-800 placeholder-gray-400"
+                className="w-full px-3 py-2 sm:px-3 sm:py-2.5 lg:py-2 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all text-xs sm:text-sm lg:text-sm text-gray-800 placeholder-gray-400"
               />
             </div>
             <div className="relative">
@@ -643,13 +643,13 @@ export default function Home() {
                 type="date"
                 value={deadline}
                 onChange={(e) => setDeadline(e.target.value)}
-                className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all text-gray-800"
+                className="w-full px-3 py-2 sm:px-3 sm:py-2.5 lg:py-2 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all text-xs sm:text-sm lg:text-sm text-gray-800"
               />
             </div>
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value as ContactCategory)}
-              className="px-3 py-2.5 sm:px-4 sm:py-3 bg-gray-50 border border-gray-200 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-2 sm:focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all text-sm sm:text-base text-gray-800 appearance-none cursor-pointer"
+              className="px-3 py-2 sm:px-3 sm:py-2.5 lg:py-2 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all text-xs sm:text-sm lg:text-sm text-gray-800 appearance-none cursor-pointer"
             >
               <option value="customer">👥 顧客</option>
               <option value="advisor">🎯 顧問</option>
@@ -659,7 +659,7 @@ export default function Home() {
             <button
               onClick={handleAdd}
               disabled={loading}
-              className="relative px-4 py-2.5 sm:px-6 sm:py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-sm sm:text-base rounded-xl sm:rounded-2xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 disabled:opacity-50 shadow-lg hover:shadow-xl sm:hover:scale-105 transform"
+              className="relative px-3 py-2 sm:px-4 sm:py-2.5 lg:py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-xs sm:text-sm lg:text-sm rounded-lg sm:rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 disabled:opacity-50 shadow-lg hover:shadow-xl sm:hover:scale-105 transform"
             >
               <span className="relative z-10">
                 {loading ? '追加中...' : '予定を追加'}
@@ -712,11 +712,11 @@ export default function Home() {
 
         {/* リスト表示 */}
         {viewMode === 'list' ? (
-          <div className="space-y-4">
+          <div className="space-y-2 sm:space-y-3">
             {filteredAndSortedContacts.length === 0 ? (
               <div className="text-center py-16">
                 <div className="text-navy-300 text-6xl mb-4">📅</div>
-                <h3 className="text-2xl font-bold text-navy-700 mb-2">連絡先がありません</h3>
+                <h3 className="text-xl sm:text-2xl font-bold text-navy-700 mb-2">連絡先がありません</h3>
                 <p className="text-navy-500">
                   {selectedCategory !== 'all' ? '条件に一致する連絡先がありません' : '新しい連絡先を追加してみましょう'}
                 </p>
@@ -774,13 +774,13 @@ export default function Home() {
                         <div className="flex gap-2">
                           <button
                             onClick={() => saveEdit(contact.id)}
-                            className="px-6 py-2 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white font-medium rounded-xl hover:from-emerald-700 hover:to-emerald-800 transition-all duration-200 shadow-md hover:shadow-lg"
+                            className="px-4 py-1.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white font-medium text-sm rounded-lg hover:from-emerald-700 hover:to-emerald-800 transition-all duration-200 shadow-md hover:shadow-lg"
                           >
                             保存
                           </button>
                           <button
                             onClick={cancelEdit}
-                            className="px-6 py-2 bg-gradient-to-r from-slate-500 to-slate-600 text-white font-medium rounded-xl hover:from-slate-600 hover:to-slate-700 transition-all duration-200 shadow-md hover:shadow-lg"
+                            className="px-4 py-1.5 bg-gradient-to-r from-slate-500 to-slate-600 text-white font-medium text-sm rounded-lg hover:from-slate-600 hover:to-slate-700 transition-all duration-200 shadow-md hover:shadow-lg"
                           >
                             キャンセル
                           </button>
