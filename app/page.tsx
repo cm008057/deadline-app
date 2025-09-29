@@ -514,8 +514,8 @@ export default function Home() {
       {/* ヘッダー */}
       <div className="bg-gradient-to-r from-slate-800 via-blue-800 to-indigo-800 text-white border-b border-blue-700/50">
         <div className="max-w-7xl mx-auto px-4 py-6 sm:py-8 lg:py-10">
-          <div className="flex justify-between items-center">
-            <div className="text-center flex-1">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div className="text-center sm:text-left sm:flex-1">
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white mb-2 tracking-tight">
                 期日管理システム
               </h1>
@@ -524,11 +524,11 @@ export default function Home() {
               </p>
             </div>
             {useDatabase && user && (
-              <div className="flex items-center gap-4 text-white">
-                <span className="text-sm opacity-75">{user.email}</span>
+              <div className="flex flex-row items-center gap-2 sm:gap-4 text-white">
+                <span className="text-xs sm:text-sm opacity-75 truncate max-w-[120px] sm:max-w-[200px]">{user.email}</span>
                 <button
                   onClick={handleLogout}
-                  className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-all text-sm font-medium"
+                  className="px-3 sm:px-4 py-1.5 sm:py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-all text-xs sm:text-sm font-medium whitespace-nowrap"
                 >
                   ログアウト
                 </button>
