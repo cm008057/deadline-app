@@ -76,7 +76,7 @@ export default function Home() {
     }
 
     setLoading(false);
-  }, [useDatabase]);
+  }, [useDatabase, user?.id]);
 
   // 認証状態の確認
   useEffect(() => {

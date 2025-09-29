@@ -20,23 +20,18 @@ export default function AuthPage() {
     try {
       if (isLogin) {
         // ログイン処理
-        const { data, error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabase!.auth.signInWithPassword({
           email,
           password,
         });
 
         if (error) throw error;
 
-        // セッション保持（30日間）
-        await supabase.auth.updateSession({
-          access_token: data.session?.access_token || '',
-          refresh_token: data.session?.refresh_token || '',
-        });
-
+        // ログイン成功後、自動的にセッションは保持される
         router.push('/');
       } else {
         // サインアップ処理
-        const { data, error } = await supabase.auth.signUp({
+        const { data, error } = await supabase!.auth.signUp({
           email,
           password,
           options: {
@@ -50,8 +45,8 @@ export default function AuthPage() {
           router.push('/');
         }
       }
-    } catch (error: any) {
-      setError(error.message || 'エラーが発生しました');
+    } catch (error) {
+      setError((error as Error).message || 'エラーが発生しました');
     } finally {
       setLoading(false);
     }
