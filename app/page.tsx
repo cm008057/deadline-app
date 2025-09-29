@@ -22,6 +22,8 @@ interface Contact {
   recurringDays?: number; // X日おき
   recurringWeekday?: number; // 0-6 (日曜-土曜)
   order?: number; // 表示順序
+  isOverdue?: boolean; // 期限切れフラグ
+  originalDeadline?: string; // 元の期日（期限切れの場合）
 }
 
 export default function Home() {
@@ -94,6 +96,28 @@ export default function Home() {
     return defaultIcons[index];
   };
 
+  // 期限切れチェックと自動修正
+  const checkAndFixOverdueContacts = (contacts: Contact[]): Contact[] => {
+    const today = new Date().toISOString().split('T')[0];
+
+    return contacts.map(contact => {
+      const contactDate = new Date(contact.deadline);
+      const todayDate = new Date(today);
+
+      // 期限切れかつ未完了の場合
+      if (contactDate < todayDate && contact.status === 'pending') {
+        return {
+          ...contact,
+          originalDeadline: contact.originalDeadline || contact.deadline, // 初回のみ元の期日を保存
+          deadline: today, // 期日を今日に修正
+          isOverdue: true // 期限切れフラグを設定
+        };
+      }
+
+      return contact;
+    });
+  };
+
   const loadContacts = useCallback(async () => {
     setLoading(true);
 
@@ -124,10 +148,13 @@ export default function Home() {
           completedAt: dbContact.completed_at || undefined,
           recurring: dbContact.recurring
         }));
-        setContacts(formattedContacts);
+
+        // 期限切れチェックと修正
+        const checkedContacts = checkAndFixOverdueContacts(formattedContacts);
+        setContacts(checkedContacts);
 
         // カスタムカテゴリを抽出
-        const customCats = extractCustomCategories(formattedContacts);
+        const customCats = extractCustomCategories(checkedContacts);
         setCustomCategories(customCats);
 
         setLoading(false);
@@ -175,10 +202,13 @@ export default function Home() {
           completedAt: dbContact.completed_at || undefined,
           recurring: dbContact.recurring
         }));
-        setContacts(formattedContacts);
+
+        // 期限切れチェックと修正
+        const checkedContacts = checkAndFixOverdueContacts(formattedContacts);
+        setContacts(checkedContacts);
 
         // カスタムカテゴリを抽出
-        const customCats = extractCustomCategories(formattedContacts);
+        const customCats = extractCustomCategories(checkedContacts);
         setCustomCategories(customCats);
       } else {
         // 通常のデータ読み込み
@@ -193,10 +223,13 @@ export default function Home() {
           completedAt: dbContact.completed_at || undefined,
           recurring: dbContact.recurring
         }));
-        setContacts(formattedContacts);
+
+        // 期限切れチェックと修正
+        const checkedContacts = checkAndFixOverdueContacts(formattedContacts);
+        setContacts(checkedContacts);
 
         // カスタムカテゴリを抽出
-        const customCats = extractCustomCategories(formattedContacts);
+        const customCats = extractCustomCategories(checkedContacts);
         setCustomCategories(customCats);
       }
     } else if (!useDatabase) {
@@ -207,10 +240,13 @@ export default function Home() {
           ...contact,
           category: contact.category || 'customer'
         }));
-        setContacts(parsedContacts);
+
+        // 期限切れチェックと修正
+        const checkedContacts = checkAndFixOverdueContacts(parsedContacts);
+        setContacts(checkedContacts);
 
         // カスタムカテゴリを抽出
-        const customCats = extractCustomCategories(parsedContacts);
+        const customCats = extractCustomCategories(checkedContacts);
         setCustomCategories(customCats);
       }
 
@@ -353,11 +389,14 @@ export default function Home() {
       });
     }
 
-    setContacts(contacts.map(c =>
+    const updatedContacts = contacts.map(c =>
       c.id === id
-        ? { ...c, name: editName, purpose: editPurpose, deadline: editDeadline, category: editCategory }
+        ? { ...c, name: editName, purpose: editPurpose, deadline: editDeadline, category: editCategory, isOverdue: false, originalDeadline: undefined }
         : c
-    ));
+    );
+    // 期限切れチェック
+    const checkedContacts = checkAndFixOverdueContacts(updatedContacts);
+    setContacts(checkedContacts);
     setEditMode(null);
   };
 
@@ -446,7 +485,9 @@ export default function Home() {
           completedAt: dbContact.completed_at || undefined,
           recurring: dbContact.recurring
         };
-        setContacts([...contacts, newContact]);
+        // 期限切れチェック
+        const checkedContact = checkAndFixOverdueContacts([newContact])[0];
+        setContacts([...contacts, checkedContact]);
       }
     } else {
       // LocalStorageに保存
@@ -460,7 +501,9 @@ export default function Home() {
         customCategory: category === 'other' ? customCategory : undefined,
         createdAt: new Date().toISOString(),
       };
-      setContacts([...contacts, newContact]);
+      // 期限切れチェック
+      const checkedContact = checkAndFixOverdueContacts([newContact])[0];
+      setContacts([...contacts, checkedContact]);
     }
 
     setName('');
@@ -864,7 +907,7 @@ export default function Home() {
                   />
                   <div className="flex-1">
                     {editMode === contact.id ? (
-                      /* 編集モード */
+                      // 編集モード
                       <div className="space-y-3">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                           <input
@@ -919,7 +962,6 @@ export default function Home() {
                         </div>
                       </div>
                     ) : (
-                      /* 表示モード */
                       <>
                         <div className="flex items-center gap-3 mb-2 flex-wrap">
                           <h3 className="text-base sm:text-lg lg:text-xl font-bold text-gray-800">{contact.name}</h3>
@@ -935,6 +977,11 @@ export default function Home() {
                               : 'bg-gray-100 text-gray-700'
                           }`}>
                             📅 {formatDeadline(contact.deadline)}
+                            {contact.isOverdue && contact.originalDeadline && (
+                              <span className="text-red-600 font-bold">
+                                (期日{new Date(contact.originalDeadline).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' })})
+                              </span>
+                            )}
                           </span>
                         </div>
                         <p className="text-gray-600 text-xs sm:text-sm lg:text-base leading-relaxed mt-1.5 sm:mt-2">{contact.purpose}</p>
@@ -1152,7 +1199,6 @@ export default function Home() {
           )}
         </div>
         ) : (
-          /* カンバンビュー */
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* 本日 */}
             <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-red-200">
@@ -1224,6 +1270,11 @@ export default function Home() {
                           <p className="text-xs text-navy-600 mt-0.5 sm:mt-1 line-clamp-2">{contact.purpose}</p>
                           <p className="text-xs text-orange-700 font-bold mt-1">
                             {new Date(contact.deadline).toLocaleDateString('ja-JP')}
+                            {contact.isOverdue && contact.originalDeadline && (
+                              <span className="text-red-600 font-bold ml-1">
+                                (期日{new Date(contact.originalDeadline).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' })})
+                              </span>
+                            )}
                           </p>
                           <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold mt-2 ${getCategoryDisplay(contact.category).color}`}>
                             {getCategoryDisplay(contact.category).label}
@@ -1272,6 +1323,11 @@ export default function Home() {
                           <p className="text-xs text-navy-600 mt-0.5 sm:mt-1 line-clamp-2">{contact.purpose}</p>
                           <p className="text-xs text-navy-700 font-bold mt-1">
                             {new Date(contact.deadline).toLocaleDateString('ja-JP')}
+                            {contact.isOverdue && contact.originalDeadline && (
+                              <span className="text-red-600 font-bold ml-1">
+                                (期日{new Date(contact.originalDeadline).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' })})
+                              </span>
+                            )}
                           </p>
                           <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold mt-2 ${getCategoryDisplay(contact.category).color}`}>
                             {getCategoryDisplay(contact.category).label}
