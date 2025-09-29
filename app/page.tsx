@@ -48,23 +48,67 @@ export default function Home() {
   const loadContacts = useCallback(async () => {
     setLoading(true);
 
-    if (useDatabase) {
+    if (useDatabase && user) {
       // Supabaseから読み込み（ユーザー固有のデータ）
-      const dbContacts = await contactsApi.getAll(user?.id);
-      const formattedContacts: Contact[] = dbContacts.map(dbContact => ({
-        id: dbContact.id || '',
-        name: dbContact.name,
-        purpose: dbContact.purpose,
-        deadline: dbContact.deadline,
-        status: dbContact.status,
-        category: dbContact.category || 'customer',
-        createdAt: dbContact.created_at || '',
-        completedAt: dbContact.completed_at || undefined,
-        recurring: dbContact.recurring
-      }));
-      setContacts(formattedContacts);
-    } else {
-      // LocalStorageから読み込み
+      const dbContacts = await contactsApi.getAll(user.id);
+
+      // LocalStorageにデータがあり、Supabaseが空の場合、自動マイグレーション
+      const stored = localStorage.getItem('contacts');
+      if (stored && dbContacts.length === 0) {
+        const localContacts = JSON.parse(stored);
+        console.log('自動マイグレーション: LocalStorage → Supabase');
+
+        // LocalStorageのデータをSupabaseに移行
+        for (const contact of localContacts) {
+          await contactsApi.create({
+            name: contact.name,
+            purpose: contact.purpose,
+            deadline: contact.deadline,
+            status: contact.status || 'pending',
+            category: contact.category || 'customer',
+            recurring: contact.recurring,
+            recurring_days: contact.recurringDays,
+            recurring_weekday: contact.recurringWeekday,
+            order: contact.order || 0,
+            user_id: user.id
+          });
+        }
+
+        // マイグレーション完了後、LocalStorageをクリア
+        localStorage.removeItem('contacts');
+        alert('以前のデータを正常に移行しました');
+
+        // 再度Supabaseからデータを取得
+        const migratedContacts = await contactsApi.getAll(user.id);
+        const formattedContacts: Contact[] = migratedContacts.map(dbContact => ({
+          id: dbContact.id || '',
+          name: dbContact.name,
+          purpose: dbContact.purpose,
+          deadline: dbContact.deadline,
+          status: dbContact.status,
+          category: dbContact.category || 'customer',
+          createdAt: dbContact.created_at || '',
+          completedAt: dbContact.completed_at || undefined,
+          recurring: dbContact.recurring
+        }));
+        setContacts(formattedContacts);
+      } else {
+        // 通常のデータ読み込み
+        const formattedContacts: Contact[] = dbContacts.map(dbContact => ({
+          id: dbContact.id || '',
+          name: dbContact.name,
+          purpose: dbContact.purpose,
+          deadline: dbContact.deadline,
+          status: dbContact.status,
+          category: dbContact.category || 'customer',
+          createdAt: dbContact.created_at || '',
+          completedAt: dbContact.completed_at || undefined,
+          recurring: dbContact.recurring
+        }));
+        setContacts(formattedContacts);
+      }
+    } else if (!useDatabase) {
+      // LocalStorageから読み込み（ログインなしモード）
       const stored = localStorage.getItem('contacts');
       if (stored) {
         const parsedContacts = JSON.parse(stored).map((contact: Contact) => ({
@@ -76,7 +120,7 @@ export default function Home() {
     }
 
     setLoading(false);
-  }, [useDatabase, user?.id]);
+  }, [useDatabase, user]);
 
   // 認証状態の確認
   useEffect(() => {
