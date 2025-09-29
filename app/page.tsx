@@ -407,10 +407,10 @@ export default function Home() {
   // カテゴリ表示用
   const getCategoryDisplay = (category: ContactCategory | undefined) => {
     const categories = {
-      advisor: { label: '顧問', emoji: '🎯', color: 'bg-gradient-to-r from-violet-500 to-purple-500 text-white' },
-      agency: { label: '代理店', emoji: '🏢', color: 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white' },
-      customer: { label: '顧客', emoji: '👥', color: 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white' },
-      other: { label: 'その他', emoji: '📌', color: 'bg-gradient-to-r from-gray-500 to-slate-500 text-white' }
+      advisor: { label: '顧問', emoji: '🎯', color: 'bg-gradient-to-r from-blue-600 to-blue-700 text-white' },
+      agency: { label: '代理店', emoji: '🏢', color: 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white' },
+      customer: { label: '顧客', emoji: '👥', color: 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white' },
+      other: { label: 'その他', emoji: '📌', color: 'bg-gradient-to-r from-gray-600 to-slate-600 text-white' }
     };
     return categories[category || 'customer'];
   };
@@ -439,31 +439,27 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900">
       {/* ヘッダー */}
-      <div className="bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div className="bg-gradient-to-r from-slate-800 via-blue-800 to-indigo-800 text-white border-b border-blue-700/50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center">
-            <div className="inline-flex items-center justify-center p-3 bg-white/10 backdrop-blur rounded-2xl mb-6">
-              <span className="text-5xl">⏰</span>
-            </div>
-            <h1 className="text-5xl font-black tracking-tight mb-4">
-              Deadline Manager
+            <h1 className="text-5xl font-black text-white mb-4 tracking-tight">
+              期日管理システム
             </h1>
-            <p className="text-xl text-indigo-100 font-light max-w-2xl mx-auto">
-              スマートな期日管理で、大切な連絡を見逃さない
+            <p className="text-xl text-blue-100 font-light max-w-2xl mx-auto">
+              顧問・代理店・顧客との連絡を効率的に管理
             </p>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
         {/* 入力フォーム */}
-        <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8 mb-8 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-purple-200 to-pink-200 rounded-full blur-3xl opacity-20"></div>
-          <h2 className="text-2xl font-black bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-8">
-            新しい予定を追加
+        <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8 mb-8">
+          <h2 className="text-2xl font-black text-slate-800 mb-8">
+            📝 新規登録
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
             <div className="relative">
@@ -505,7 +501,7 @@ export default function Home() {
             <button
               onClick={handleAdd}
               disabled={loading}
-              className="relative px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold text-lg rounded-2xl hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 disabled:opacity-50 shadow-xl hover:shadow-2xl hover:scale-105 transform"
+              className="relative px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-lg rounded-2xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 disabled:opacity-50 shadow-xl hover:shadow-2xl hover:scale-105 transform"
             >
               <span className="relative z-10">
                 {loading ? '追加中...' : '予定を追加'}
@@ -690,7 +686,7 @@ export default function Home() {
                     {/* 完了後のアクション選択 */}
                     {contact.status === 'completed' && editingId === contact.id && (
                       <div className="mt-6 p-6 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl border border-indigo-200/50">
-                        <p className="text-sm font-bold text-indigo-800 mb-4">🎆 完了おめでとう！次のアクションを選択:
+                        <p className="text-sm font-bold text-indigo-800 mb-4">🎆 完了おめでとう！次のアクションを選択:</p>
                         <div className="space-y-3">
                           {/* 次回期日設定 */}
                           <div>
