@@ -9,6 +9,7 @@
 3. SQL Editorで以下のテーブルを作成：
 
 ```sql
+-- Contactsテーブルの作成
 CREATE TABLE contacts (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   name TEXT NOT NULL,
@@ -22,15 +23,27 @@ CREATE TABLE contacts (
   order_index INTEGER,
   created_at TIMESTAMP DEFAULT NOW(),
   completed_at TIMESTAMP,
-  user_id TEXT
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE
 );
 
 -- RLS（Row Level Security）を有効化
 ALTER TABLE contacts ENABLE ROW LEVEL SECURITY;
 
--- ポリシーを作成（全ユーザーがアクセス可能）
-CREATE POLICY "Enable all access for all users" ON contacts
-  FOR ALL USING (true) WITH CHECK (true);
+-- ユーザー認証機能を有効化
+-- Authentication > Settings > Enable email confirmationsをOFFに設定
+
+-- ポリシーを作成（ユーザーは自分のデータのみアクセス可能）
+CREATE POLICY "Users can view own contacts" ON contacts
+  FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own contacts" ON contacts
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own contacts" ON contacts
+  FOR UPDATE USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete own contacts" ON contacts
+  FOR DELETE USING (auth.uid() = user_id);
 ```
 
 4. Settings > API から以下を取得：

@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
-import { contactsApi, isSupabaseConfigured } from '../lib/supabase';
+import { useRouter } from 'next/navigation';
+import { contactsApi, isSupabaseConfigured, supabase } from '../lib/supabase';
+import type { User } from '@supabase/supabase-js';
 
 type ContactStatus = 'pending' | 'completed';
 type ContactCategory = 'advisor' | 'agency' | 'customer' | 'other';
@@ -39,13 +41,16 @@ export default function Home() {
   const [editDeadline, setEditDeadline] = useState('');
   const [editCategory, setEditCategory] = useState<ContactCategory>('customer');
   const [sortMode, setSortMode] = useState<'auto' | 'manual'>('auto');
+  const [user, setUser] = useState<User | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const router = useRouter();
 
   const loadContacts = useCallback(async () => {
     setLoading(true);
 
     if (useDatabase) {
-      // Supabaseから読み込み
-      const dbContacts = await contactsApi.getAll();
+      // Supabaseから読み込み（ユーザー固有のデータ）
+      const dbContacts = await contactsApi.getAll(user?.id);
       const formattedContacts: Contact[] = dbContacts.map(dbContact => ({
         id: dbContact.id || '',
         name: dbContact.name,
@@ -73,10 +78,55 @@ export default function Home() {
     setLoading(false);
   }, [useDatabase]);
 
+  // 認証状態の確認
+  useEffect(() => {
+    const checkAuth = async () => {
+      if (!useDatabase) {
+        setAuthLoading(false);
+        return;
+      }
+
+      try {
+        const { data: { session } } = await supabase!.auth.getSession();
+        if (session?.user) {
+          setUser(session.user);
+        } else {
+          router.push('/auth');
+          return;
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error);
+        router.push('/auth');
+        return;
+      }
+      setAuthLoading(false);
+    };
+
+    checkAuth();
+
+    // 認証状態の変更を監視
+    if (useDatabase && supabase) {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        async (event, session) => {
+          if (session?.user) {
+            setUser(session.user);
+          } else {
+            setUser(null);
+            router.push('/auth');
+          }
+        }
+      );
+
+      return () => subscription.unsubscribe();
+    }
+  }, [router, useDatabase]);
+
   // データの読み込み
   useEffect(() => {
-    loadContacts();
-  }, [loadContacts]);
+    if (user || !useDatabase) {
+      loadContacts();
+    }
+  }, [loadContacts, user, useDatabase]);
 
   // ブラウザ通知の初期化
   useEffect(() => {
@@ -217,13 +267,14 @@ export default function Home() {
     setLoading(true);
 
     if (useDatabase) {
-      // Supabaseに保存
+      // Supabaseに保存（ユーザーIDを含める）
       const dbContact = await contactsApi.create({
         name,
         purpose,
         deadline,
         status: 'pending',
-        category
+        category,
+        user_id: user?.id
       });
 
       if (dbContact) {
@@ -415,6 +466,14 @@ export default function Home() {
     return categories[category || 'customer'];
   };
 
+  // ログアウト
+  const handleLogout = async () => {
+    if (useDatabase && supabase) {
+      await supabase.auth.signOut();
+      router.push('/auth');
+    }
+  };
+
   // 通知の有効化
   const enableNotifications = async () => {
     if (!('Notification' in window)) {
@@ -438,18 +497,43 @@ export default function Home() {
     }
   };
 
+  // 認証ローディング中
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white mx-auto mb-4"></div>
+          <p className="text-white text-lg">読み込み中...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900">
       {/* ヘッダー */}
       <div className="bg-gradient-to-r from-slate-800 via-blue-800 to-indigo-800 text-white border-b border-blue-700/50">
         <div className="max-w-7xl mx-auto px-4 py-6 sm:py-8 lg:py-10">
-          <div className="text-center">
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white mb-2 tracking-tight">
-              期日管理システム
-            </h1>
-            <p className="text-sm sm:text-base lg:text-lg text-blue-100 font-light max-w-2xl mx-auto">
-              顧問・代理店・顧客との連絡を効率的に管理
-            </p>
+          <div className="flex justify-between items-center">
+            <div className="text-center flex-1">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white mb-2 tracking-tight">
+                期日管理システム
+              </h1>
+              <p className="text-sm sm:text-base lg:text-lg text-blue-100 font-light">
+                顧問・代理店・顧客との連絡を効率的に管理
+              </p>
+            </div>
+            {useDatabase && user && (
+              <div className="flex items-center gap-4 text-white">
+                <span className="text-sm opacity-75">{user.email}</span>
+                <button
+                  onClick={handleLogout}
+                  className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-all text-sm font-medium"
+                >
+                  ログアウト
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

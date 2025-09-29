@@ -10,7 +10,14 @@ export const isSupabaseConfigured = () => {
 };
 
 export const supabase = isSupabaseConfigured()
-  ? createClient(supabaseUrl, supabaseAnonKey)
+  ? createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: true, // セッションを永続化
+        autoRefreshToken: true, // トークンを自動更新
+        detectSessionInUrl: true, // URLからセッションを検出
+        storage: typeof window !== 'undefined' ? window.localStorage : undefined, // LocalStorageに保存
+      },
+    })
   : null;
 
 // データベースの型定義
@@ -32,14 +39,20 @@ export interface DbContact {
 
 // Contacts テーブル操作用の関数
 export const contactsApi = {
-  // 全件取得
-  async getAll(): Promise<DbContact[]> {
+  // 全件取得（ユーザーIDでフィルタリング）
+  async getAll(userId?: string): Promise<DbContact[]> {
     if (!supabase) return [];
 
-    const { data, error } = await supabase
+    let query = supabase
       .from('contacts')
-      .select('*')
-      .order('deadline', { ascending: true });
+      .select('*');
+
+    // ユーザーIDが指定されている場合のみフィルタリング
+    if (userId) {
+      query = query.eq('user_id', userId);
+    }
+
+    const { data, error } = await query.order('deadline', { ascending: true });
 
     if (error) {
       console.error('Error fetching contacts:', error);
