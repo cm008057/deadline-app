@@ -407,10 +407,10 @@ export default function Home() {
   // カテゴリ表示用
   const getCategoryDisplay = (category: ContactCategory | undefined) => {
     const categories = {
-      advisor: { label: '👨‍💼 顧問', color: 'bg-navy-100 text-navy-800 border border-navy-200' },
-      agency: { label: '🏢 代理店', color: 'bg-emerald-100 text-emerald-800 border border-emerald-200' },
-      customer: { label: '👥 顧客', color: 'bg-blue-100 text-blue-800 border border-blue-200' },
-      other: { label: '📋 その他', color: 'bg-slate-100 text-slate-800 border border-slate-200' }
+      advisor: { label: '顧問', emoji: '🎯', color: 'bg-gradient-to-r from-violet-500 to-purple-500 text-white' },
+      agency: { label: '代理店', emoji: '🏢', color: 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white' },
+      customer: { label: '顧客', emoji: '👥', color: 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white' },
+      other: { label: 'その他', emoji: '📌', color: 'bg-gradient-to-r from-gray-500 to-slate-500 text-white' }
     };
     return categories[category || 'customer'];
   };
@@ -439,99 +439,119 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-8">
-      <div className="max-w-6xl mx-auto px-4">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-navy-900 mb-4">📅 期日管理システム</h1>
-          <p className="text-navy-600 text-lg">顧問・代理店・顧客との連絡を効率的に管理</p>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50">
+      {/* ヘッダー */}
+      <div className="bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="text-center">
+            <div className="inline-flex items-center justify-center p-3 bg-white/10 backdrop-blur rounded-2xl mb-6">
+              <span className="text-5xl">⏰</span>
+            </div>
+            <h1 className="text-5xl font-black tracking-tight mb-4">
+              Deadline Manager
+            </h1>
+            <p className="text-xl text-indigo-100 font-light max-w-2xl mx-auto">
+              スマートな期日管理で、大切な連絡を見逃さない
+            </p>
+          </div>
         </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8">
 
         {/* 入力フォーム */}
-        <div className="bg-white rounded-2xl shadow-lg border border-navy-100 p-8 mb-8">
-          <h2 className="text-2xl font-bold text-navy-800 mb-6 flex items-center gap-2">
-            <span className="bg-navy-100 p-2 rounded-lg">➕</span>
-            新規登録
+        <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8 mb-8 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-purple-200 to-pink-200 rounded-full blur-3xl opacity-20"></div>
+          <h2 className="text-2xl font-black bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-8">
+            新しい予定を追加
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-            <input
-              type="text"
-              placeholder="名前"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="px-4 py-3 border-2 border-navy-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-navy-500 focus:border-navy-500 transition-all"
-            />
-            <input
-              type="text"
-              placeholder="連絡目的"
-              value={purpose}
-              onChange={(e) => setPurpose(e.target.value)}
-              className="px-4 py-3 border-2 border-navy-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-navy-500 focus:border-navy-500 transition-all"
-            />
-            <input
-              type="date"
-              value={deadline}
-              onChange={(e) => setDeadline(e.target.value)}
-              className="px-4 py-3 border-2 border-navy-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-navy-500 focus:border-navy-500 transition-all"
-            />
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="お名前"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all text-gray-800 placeholder-gray-400"
+              />
+            </div>
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="連絡の目的"
+                value={purpose}
+                onChange={(e) => setPurpose(e.target.value)}
+                className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all text-gray-800 placeholder-gray-400"
+              />
+            </div>
+            <div className="relative">
+              <input
+                type="date"
+                value={deadline}
+                onChange={(e) => setDeadline(e.target.value)}
+                className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all text-gray-800"
+              />
+            </div>
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value as ContactCategory)}
-              className="px-4 py-3 border-2 border-navy-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-navy-500 focus:border-navy-500 transition-all"
+              className="px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all text-gray-800 appearance-none cursor-pointer"
             >
               <option value="customer">👥 顧客</option>
-              <option value="advisor">👨‍💼 顧問</option>
+              <option value="advisor">🎯 顧問</option>
               <option value="agency">🏢 代理店</option>
-              <option value="other">📋 その他</option>
+              <option value="other">📌 その他</option>
             </select>
             <button
               onClick={handleAdd}
               disabled={loading}
-              className="px-8 py-3 bg-gradient-to-r from-navy-600 to-navy-700 text-white font-semibold rounded-xl hover:from-navy-700 hover:to-navy-800 transition-all duration-200 disabled:opacity-50 shadow-lg hover:shadow-xl"
+              className="relative px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold text-lg rounded-2xl hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 disabled:opacity-50 shadow-xl hover:shadow-2xl hover:scale-105 transform"
             >
-              {loading ? '追加中...' : '✨ 追加'}
+              <span className="relative z-10">
+                {loading ? '追加中...' : '予定を追加'}
+              </span>
             </button>
           </div>
         </div>
 
         {/* フィルタ・表示モード切替 */}
-        <div className="bg-white rounded-2xl shadow-lg border border-navy-100 p-6 mb-8">
-          <div className="flex flex-wrap gap-4 items-center">
-            <div className="flex items-center gap-2">
-              <span className="text-navy-700 font-medium">📂</span>
+        <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-xl border border-white/20 p-6 mb-8">
+          <div className="flex flex-wrap gap-3 items-center justify-between">
+            <div className="flex flex-wrap gap-3">
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value as ContactCategory | 'all')}
-                className="px-4 py-2 border-2 border-navy-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-navy-500 focus:border-navy-500 transition-all"
+                className="px-6 py-3 bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium text-gray-700 cursor-pointer hover:bg-gradient-to-r hover:from-gray-100 hover:to-gray-200"
               >
-                <option value="all">全カテゴリ</option>
-                <option value="advisor">👨‍💼 顧問</option>
-                <option value="agency">🏢 代理店</option>
-                <option value="customer">👥 顧客</option>
-                <option value="other">📋 その他</option>
+                <option value="all">🎨 全カテゴリ</option>
+                <option value="advisor">🎯 顧問のみ</option>
+                <option value="agency">🏢 代理店のみ</option>
+                <option value="customer">👥 顧客のみ</option>
+                <option value="other">📌 その他のみ</option>
               </select>
+              <button
+                onClick={() => setViewMode(viewMode === 'list' ? 'kanban' : 'list')}
+                className="px-6 py-3 bg-gradient-to-r from-indigo-50 to-purple-50 text-indigo-700 font-semibold rounded-2xl hover:from-indigo-100 hover:to-purple-100 transition-all duration-200 border border-indigo-200/50"
+              >
+                {viewMode === 'list' ? '📊 ボード表示' : '📋 リスト表示'}
+              </button>
+              <button
+                onClick={() => setSortMode(sortMode === 'auto' ? 'manual' : 'auto')}
+                className="px-6 py-3 bg-gradient-to-r from-purple-50 to-pink-50 text-purple-700 font-semibold rounded-2xl hover:from-purple-100 hover:to-pink-100 transition-all duration-200 border border-purple-200/50"
+              >
+                {sortMode === 'auto' ? '🔄 手動ソート' : '⚡ 自動ソート'}
+              </button>
             </div>
             <button
-              onClick={() => setViewMode(viewMode === 'list' ? 'kanban' : 'list')}
-              className="px-5 py-2 bg-navy-100 text-navy-700 font-medium rounded-xl hover:bg-navy-200 transition-all duration-200"
-            >
-              {viewMode === 'list' ? '📋 カンバン' : '📝 リスト'}
-            </button>
-            <button
-              onClick={() => setSortMode(sortMode === 'auto' ? 'manual' : 'auto')}
-              className="px-5 py-2 bg-navy-100 text-navy-700 font-medium rounded-xl hover:bg-navy-200 transition-all duration-200"
-            >
-              {sortMode === 'auto' ? '🔄 手動並替' : '⚡ 自動並替'}
-            </button>
-            <button
               onClick={enableNotifications}
-              className={`px-5 py-2 font-medium rounded-xl transition-all duration-200 ${
+              className={`px-6 py-3 font-semibold rounded-2xl transition-all duration-200 ${
                 notificationEnabled
-                  ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
-                  : 'bg-amber-100 text-amber-700 hover:bg-amber-200'
+                  ? 'bg-green-100 text-green-700 cursor-not-allowed border border-green-200'
+                  : 'bg-gradient-to-r from-amber-400 to-orange-400 text-white hover:from-amber-500 hover:to-orange-500 shadow-lg hover:shadow-xl'
               }`}
               disabled={notificationEnabled}
             >
-              {notificationEnabled ? '🔔 通知有効' : '🔔 通知を有効化'}
+              {notificationEnabled ? '✅ 通知ON' : '🔔 通知をON'}
             </button>
           </div>
         </div>
@@ -549,8 +569,8 @@ export default function Home() {
               </div>
             ) : (
             filteredAndSortedContacts.map((contact) => (
-              <div key={contact.id} className={`bg-white rounded-2xl shadow-lg border border-navy-100 p-6 hover:shadow-xl transition-all duration-200 animate-fadeInUp ${
-                contact.status === 'completed' ? 'opacity-60 bg-gray-50' : ''
+              <div key={contact.id} className={`group bg-white rounded-3xl shadow-lg border border-gray-100 p-7 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 ${
+                contact.status === 'completed' ? 'opacity-50 bg-gray-50/50' : ''
               }`}>
                 <div className="flex items-start gap-4">
                   <input
@@ -616,33 +636,34 @@ export default function Home() {
                       /* 表示モード */
                       <>
                         <div className="flex items-center gap-3 mb-2 flex-wrap">
-                          <h3 className="text-lg font-semibold">{contact.name}</h3>
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getCategoryDisplay(contact.category).color}`}>
-                            {getCategoryDisplay(contact.category).label}
+                          <h3 className="text-2xl font-black text-gray-800">{contact.name}</h3>
+                          <span className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold ${getCategoryDisplay(contact.category).color} shadow-md`}>
+                            <span>{getCategoryDisplay(contact.category).emoji}</span>
+                            <span>{getCategoryDisplay(contact.category).label}</span>
                           </span>
-                          <span className={`text-sm font-medium ${
+                          <span className={`inline-flex items-center gap-1 text-sm font-bold px-3 py-1 rounded-lg ${
                             new Date(contact.deadline).toDateString() === new Date().toDateString()
-                              ? 'text-red-600'
+                              ? 'bg-red-100 text-red-700'
                               : new Date(contact.deadline) < new Date()
-                              ? 'text-orange-600'
-                              : 'text-gray-600'
+                              ? 'bg-orange-100 text-orange-700'
+                              : 'bg-gray-100 text-gray-700'
                           }`}>
-                            {formatDeadline(contact.deadline)}
+                            📅 {formatDeadline(contact.deadline)}
                           </span>
                         </div>
-                        <p className="text-gray-700">{contact.purpose}</p>
+                        <p className="text-gray-600 text-lg leading-relaxed mt-3">{contact.purpose}</p>
 
                         {/* アクションボタン */}
                         <div className="flex gap-2 mt-3">
                           <button
                             onClick={() => startEdit(contact)}
-                            className="px-4 py-2 text-sm bg-navy-100 text-navy-700 font-medium rounded-xl hover:bg-navy-200 transition-all duration-200"
+                            className="px-5 py-2.5 text-sm bg-gradient-to-r from-indigo-50 to-blue-50 text-indigo-700 font-bold rounded-2xl hover:from-indigo-100 hover:to-blue-100 transition-all duration-200 border border-indigo-200/50"
                           >
                             ✂️ 編集
                           </button>
                           <button
                             onClick={() => deleteContact(contact.id)}
-                            className="px-4 py-2 text-sm bg-red-100 text-red-700 font-medium rounded-xl hover:bg-red-200 transition-all duration-200"
+                            className="px-5 py-2.5 text-sm bg-gradient-to-r from-red-50 to-pink-50 text-red-700 font-bold rounded-2xl hover:from-red-100 hover:to-pink-100 transition-all duration-200 border border-red-200/50"
                           >
                             🗑️ 削除
                           </button>
@@ -668,8 +689,8 @@ export default function Home() {
 
                     {/* 完了後のアクション選択 */}
                     {contact.status === 'completed' && editingId === contact.id && (
-                      <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                        <p className="text-sm font-medium mb-3">次のアクションを選択:</p>
+                      <div className="mt-6 p-6 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl border border-indigo-200/50">
+                        <p className="text-sm font-bold text-indigo-800 mb-4">🎆 完了おめでとう！次のアクションを選択:
                         <div className="space-y-3">
                           {/* 次回期日設定 */}
                           <div>
@@ -681,7 +702,7 @@ export default function Home() {
                                   tomorrow.setDate(tomorrow.getDate() + 1);
                                   setNextDeadline(contact.id, tomorrow.toISOString().split('T')[0]);
                                 }}
-                                className="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+                                className="px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-semibold rounded-xl hover:from-blue-600 hover:to-indigo-600 shadow-md hover:shadow-lg transition-all"
                               >
                                 明日
                               </button>
@@ -691,7 +712,7 @@ export default function Home() {
                                   nextWeek.setDate(nextWeek.getDate() + 7);
                                   setNextDeadline(contact.id, nextWeek.toISOString().split('T')[0]);
                                 }}
-                                className="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+                                className="px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-semibold rounded-xl hover:from-blue-600 hover:to-indigo-600 shadow-md hover:shadow-lg transition-all"
                               >
                                 1週間後
                               </button>
@@ -701,7 +722,7 @@ export default function Home() {
                                   nextMonth.setMonth(nextMonth.getMonth() + 1);
                                   setNextDeadline(contact.id, nextMonth.toISOString().split('T')[0]);
                                 }}
-                                className="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+                                className="px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-semibold rounded-xl hover:from-blue-600 hover:to-indigo-600 shadow-md hover:shadow-lg transition-all"
                               >
                                 1ヶ月後
                               </button>
@@ -729,7 +750,7 @@ export default function Home() {
                                     tomorrow.setDate(tomorrow.getDate() + 1);
                                     setNextDeadline(contact.id, tomorrow.toISOString().split('T')[0], 'daily');
                                   }}
-                                  className="px-3 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200"
+                                  className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold rounded-xl hover:from-emerald-600 hover:to-teal-600 shadow-md hover:shadow-lg transition-all"
                                 >
                                   毎日
                                 </button>
@@ -739,7 +760,7 @@ export default function Home() {
                                     nextWeek.setDate(nextWeek.getDate() + 7);
                                     setNextDeadline(contact.id, nextWeek.toISOString().split('T')[0], 'weekly');
                                   }}
-                                  className="px-3 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200"
+                                  className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold rounded-xl hover:from-emerald-600 hover:to-teal-600 shadow-md hover:shadow-lg transition-all"
                                 >
                                   毎週
                                 </button>
@@ -749,7 +770,7 @@ export default function Home() {
                                     nextMonth.setMonth(nextMonth.getMonth() + 1);
                                     setNextDeadline(contact.id, nextMonth.toISOString().split('T')[0], 'monthly');
                                   }}
-                                  className="px-3 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200"
+                                  className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold rounded-xl hover:from-emerald-600 hover:to-teal-600 shadow-md hover:shadow-lg transition-all"
                                 >
                                   毎月
                                 </button>
