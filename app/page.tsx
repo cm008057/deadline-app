@@ -629,20 +629,22 @@ export default function Home() {
       // 手動ソートモードの場合はスキップ
       if (sortMode === 'manual') return 0;
 
-      const today = new Date().toDateString();
-      const aDate = new Date(a.deadline).toDateString();
-      const bDate = new Date(b.deadline).toDateString();
-
       // 完了済みは下位
       if (a.status === 'completed' && b.status === 'pending') return 1;
       if (a.status === 'pending' && b.status === 'completed') return -1;
 
-      // 本日分を最上位
-      if (aDate === today && bDate !== today) return -1;
-      if (aDate !== today && bDate === today) return 1;
+      // ソートに使用する期日（期限切れの場合は元の期日、そうでなければ現在の期日）
+      const getSortDate = (contact: Contact) => {
+        return contact.isOverdue && contact.originalDeadline
+          ? contact.originalDeadline
+          : contact.deadline;
+      };
 
-      // 期日順
-      return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
+      const aSortDate = getSortDate(a);
+      const bSortDate = getSortDate(b);
+
+      // 期日順（期限切れも元の期日で並ぶ）
+      return new Date(aSortDate).getTime() - new Date(bSortDate).getTime();
     });
 
   // 期日表示フォーマット
@@ -1210,7 +1212,7 @@ export default function Home() {
                 {filteredAndSortedContacts
                   .filter(c => {
                     const today = new Date().toDateString();
-                    return new Date(c.deadline).toDateString() === today && c.status === 'pending';
+                    return new Date(c.deadline).toDateString() === today && c.status === 'pending' && !c.isOverdue;
                   })
                   .map(contact => (
                     <div key={contact.id} className="bg-white rounded-lg sm:rounded-xl p-2.5 sm:p-3 shadow-sm sm:shadow-md hover:shadow-lg transition-all duration-200 border border-gray-100">
@@ -1233,7 +1235,7 @@ export default function Home() {
                   ))}
                 {filteredAndSortedContacts.filter(c => {
                   const today = new Date().toDateString();
-                  return new Date(c.deadline).toDateString() === today && c.status === 'pending';
+                  return new Date(c.deadline).toDateString() === today && c.status === 'pending' && !c.isOverdue;
                 }).length === 0 && (
                   <div className="text-center py-8">
                   <div className="text-red-300 text-4xl mb-2">🎆</div>
@@ -1252,9 +1254,7 @@ export default function Home() {
               <div className="space-y-3">
                 {filteredAndSortedContacts
                   .filter(c => {
-                    const today = new Date();
-                    const deadline = new Date(c.deadline);
-                    return deadline < today && deadline.toDateString() !== today.toDateString() && c.status === 'pending';
+                    return c.isOverdue && c.status === 'pending';
                   })
                   .map(contact => (
                     <div key={contact.id} className="bg-white rounded-lg sm:rounded-xl p-2.5 sm:p-3 shadow-sm sm:shadow-md hover:shadow-lg transition-all duration-200 border border-gray-100">
@@ -1284,9 +1284,7 @@ export default function Home() {
                     </div>
                   ))}
                 {filteredAndSortedContacts.filter(c => {
-                  const today = new Date();
-                  const deadline = new Date(c.deadline);
-                  return deadline < today && deadline.toDateString() !== today.toDateString() && c.status === 'pending';
+                  return c.isOverdue && c.status === 'pending';
                 }).length === 0 && (
                   <div className="text-center py-8">
                   <div className="text-orange-300 text-4xl mb-2">🎉</div>
