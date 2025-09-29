@@ -723,15 +723,15 @@ export default function Home() {
               </div>
             ) : (
             filteredAndSortedContacts.map((contact) => (
-              <div key={contact.id} className={`group bg-white rounded-xl sm:rounded-2xl shadow-md sm:shadow-lg border border-gray-100 p-4 sm:p-5 lg:p-6 sm:hover:shadow-xl transition-all duration-300 sm:hover:-translate-y-1 ${
+              <div key={contact.id} className={`group bg-white rounded-lg sm:rounded-xl shadow-sm sm:shadow-md border border-gray-100 p-3 sm:p-3.5 lg:p-4 sm:hover:shadow-lg transition-all duration-300 sm:hover:-translate-y-0.5 ${
                 contact.status === 'completed' ? 'opacity-50 bg-gray-50/50' : ''
               }`}>
-                <div className="flex items-start gap-4">
+                <div className="flex items-start gap-3">
                   <input
                     type="checkbox"
                     checked={contact.status === 'completed'}
                     onChange={() => toggleComplete(contact.id)}
-                    className="mt-1 w-5 h-5 cursor-pointer"
+                    className="mt-0.5 w-4 h-4 lg:w-5 lg:h-5 cursor-pointer"
                   />
                   <div className="flex-1">
                     {editMode === contact.id ? (
@@ -790,12 +790,12 @@ export default function Home() {
                       /* 表示モード */
                       <>
                         <div className="flex items-center gap-3 mb-2 flex-wrap">
-                          <h3 className="text-lg sm:text-xl lg:text-2xl font-black text-gray-800">{contact.name}</h3>
-                          <span className={`inline-flex items-center gap-1 px-2 py-1 sm:px-3 sm:py-1.5 rounded-full text-xs font-bold ${getCategoryDisplay(contact.category).color} shadow-sm sm:shadow-md`}>
+                          <h3 className="text-base sm:text-lg lg:text-xl font-bold text-gray-800">{contact.name}</h3>
+                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-xs font-semibold ${getCategoryDisplay(contact.category).color} shadow-sm`}>
                             <span>{getCategoryDisplay(contact.category).emoji}</span>
                             <span>{getCategoryDisplay(contact.category).label}</span>
                           </span>
-                          <span className={`inline-flex items-center gap-1 text-sm font-bold px-3 py-1 rounded-lg ${
+                          <span className={`inline-flex items-center gap-1 text-xs sm:text-sm font-semibold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg ${
                             new Date(contact.deadline).toDateString() === new Date().toDateString()
                               ? 'bg-red-100 text-red-700'
                               : new Date(contact.deadline) < new Date()
@@ -805,19 +805,19 @@ export default function Home() {
                             📅 {formatDeadline(contact.deadline)}
                           </span>
                         </div>
-                        <p className="text-gray-600 text-sm sm:text-base leading-relaxed mt-2 sm:mt-3">{contact.purpose}</p>
+                        <p className="text-gray-600 text-xs sm:text-sm lg:text-base leading-relaxed mt-1.5 sm:mt-2">{contact.purpose}</p>
 
                         {/* アクションボタン */}
-                        <div className="flex gap-2 mt-3">
+                        <div className="flex gap-1.5 mt-2">
                           <button
                             onClick={() => startEdit(contact)}
-                            className="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-gradient-to-r from-indigo-50 to-blue-50 text-indigo-700 font-bold rounded-lg sm:rounded-xl hover:from-indigo-100 hover:to-blue-100 transition-all duration-200 border border-indigo-200/50"
+                            className="px-2.5 py-1 sm:px-3 sm:py-1.5 text-xs bg-gradient-to-r from-indigo-50 to-blue-50 text-indigo-700 font-semibold rounded-lg hover:from-indigo-100 hover:to-blue-100 transition-all duration-200 border border-indigo-200/50"
                           >
                             ✂️ 編集
                           </button>
                           <button
                             onClick={() => deleteContact(contact.id)}
-                            className="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-gradient-to-r from-red-50 to-pink-50 text-red-700 font-bold rounded-lg sm:rounded-xl hover:from-red-100 hover:to-pink-100 transition-all duration-200 border border-red-200/50"
+                            className="px-2.5 py-1 sm:px-3 sm:py-1.5 text-xs bg-gradient-to-r from-red-50 to-pink-50 text-red-700 font-semibold rounded-lg hover:from-red-100 hover:to-pink-100 transition-all duration-200 border border-red-200/50"
                           >
                             🗑️ 削除
                           </button>
@@ -825,13 +825,13 @@ export default function Home() {
                             <>
                               <button
                                 onClick={() => moveContact(contact.id, 'up')}
-                                className="px-3 py-1 text-sm bg-slate-100 text-slate-700 font-medium rounded-lg hover:bg-slate-200 transition-all duration-200"
+                                className="px-2 py-1 text-xs bg-slate-100 text-slate-700 font-medium rounded-lg hover:bg-slate-200 transition-all duration-200"
                               >
                                 ⬆️
                               </button>
                               <button
                                 onClick={() => moveContact(contact.id, 'down')}
-                                className="px-3 py-1 text-sm bg-slate-100 text-slate-700 font-medium rounded-lg hover:bg-slate-200 transition-all duration-200"
+                                className="px-2 py-1 text-xs bg-slate-100 text-slate-700 font-medium rounded-lg hover:bg-slate-200 transition-all duration-200"
                               >
                                 ⬇️
                               </button>
@@ -843,12 +843,12 @@ export default function Home() {
 
                     {/* 完了後のアクション選択 */}
                     {contact.status === 'completed' && editingId === contact.id && (
-                      <div className="mt-3 sm:mt-4 p-3 sm:p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl sm:rounded-2xl border border-indigo-200/50">
-                        <p className="text-xs sm:text-sm font-bold text-indigo-800 mb-3">🎆 完了おめでとう！次のアクションを選択:</p>
-                        <div className="space-y-3">
+                      <div className="mt-2 sm:mt-3 p-2 sm:p-3 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg sm:rounded-xl border border-indigo-200/50">
+                        <p className="text-xs font-semibold text-indigo-800 mb-2">🎆 完了おめでとう！次のアクションを選択:</p>
+                        <div className="space-y-2">
                           {/* 次回期日設定 */}
                           <div>
-                            <p className="text-xs sm:text-sm mb-2">次回期日を設定:</p>
+                            <p className="text-xs mb-1.5">次回期日を設定:</p>
                             <div className="flex gap-2 flex-wrap">
                               <button
                                 onClick={() => {
@@ -856,7 +856,7 @@ export default function Home() {
                                   tomorrow.setDate(tomorrow.getDate() + 1);
                                   setNextDeadline(contact.id, tomorrow.toISOString().split('T')[0]);
                                 }}
-                                className="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-semibold rounded-lg sm:rounded-xl hover:from-blue-600 hover:to-indigo-600 shadow-md hover:shadow-lg transition-all"
+                                className="px-2 py-1 sm:px-3 sm:py-1.5 text-xs bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-semibold rounded-lg hover:from-blue-600 hover:to-indigo-600 shadow-sm hover:shadow-md transition-all"
                               >
                                 明日
                               </button>
@@ -866,7 +866,7 @@ export default function Home() {
                                   nextWeek.setDate(nextWeek.getDate() + 7);
                                   setNextDeadline(contact.id, nextWeek.toISOString().split('T')[0]);
                                 }}
-                                className="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-semibold rounded-lg sm:rounded-xl hover:from-blue-600 hover:to-indigo-600 shadow-md hover:shadow-lg transition-all"
+                                className="px-2 py-1 sm:px-3 sm:py-1.5 text-xs bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-semibold rounded-lg hover:from-blue-600 hover:to-indigo-600 shadow-sm hover:shadow-md transition-all"
                               >
                                 1週間後
                               </button>
@@ -876,7 +876,7 @@ export default function Home() {
                                   nextMonth.setMonth(nextMonth.getMonth() + 1);
                                   setNextDeadline(contact.id, nextMonth.toISOString().split('T')[0]);
                                 }}
-                                className="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-semibold rounded-lg sm:rounded-xl hover:from-blue-600 hover:to-indigo-600 shadow-md hover:shadow-lg transition-all"
+                                className="px-2 py-1 sm:px-3 sm:py-1.5 text-xs bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-semibold rounded-lg hover:from-blue-600 hover:to-indigo-600 shadow-sm hover:shadow-md transition-all"
                               >
                                 1ヶ月後
                               </button>
