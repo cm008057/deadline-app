@@ -407,10 +407,10 @@ export default function Home() {
   // カテゴリ表示用
   const getCategoryDisplay = (category: ContactCategory | undefined) => {
     const categories = {
-      advisor: { label: '👨‍💼 顧問', color: 'bg-blue-100 text-blue-800' },
-      agency: { label: '🏢 代理店', color: 'bg-green-100 text-green-800' },
-      customer: { label: '👥 顧客', color: 'bg-purple-100 text-purple-800' },
-      other: { label: '📋 その他', color: 'bg-gray-100 text-gray-800' }
+      advisor: { label: '👨‍💼 顧問', color: 'bg-navy-100 text-navy-800 border border-navy-200' },
+      agency: { label: '🏢 代理店', color: 'bg-emerald-100 text-emerald-800 border border-emerald-200' },
+      customer: { label: '👥 顧客', color: 'bg-blue-100 text-blue-800 border border-blue-200' },
+      other: { label: '📋 その他', color: 'bg-slate-100 text-slate-800 border border-slate-200' }
     };
     return categories[category || 'customer'];
   };
@@ -439,38 +439,44 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-8">
       <div className="max-w-6xl mx-auto px-4">
-        <h1 className="text-3xl font-bold mb-8 text-gray-800">期日管理システム</h1>
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-navy-900 mb-4">📅 期日管理システム</h1>
+          <p className="text-navy-600 text-lg">顧問・代理店・顧客との連絡を効率的に管理</p>
+        </div>
 
         {/* 入力フォーム */}
-        <div className="bg-white rounded-lg shadow p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-4">新規登録</h2>
+        <div className="bg-white rounded-2xl shadow-lg border border-navy-100 p-8 mb-8">
+          <h2 className="text-2xl font-bold text-navy-800 mb-6 flex items-center gap-2">
+            <span className="bg-navy-100 p-2 rounded-lg">➕</span>
+            新規登録
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
             <input
               type="text"
               placeholder="名前"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-4 py-3 border-2 border-navy-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-navy-500 focus:border-navy-500 transition-all"
             />
             <input
               type="text"
               placeholder="連絡目的"
               value={purpose}
               onChange={(e) => setPurpose(e.target.value)}
-              className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-4 py-3 border-2 border-navy-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-navy-500 focus:border-navy-500 transition-all"
             />
             <input
               type="date"
               value={deadline}
               onChange={(e) => setDeadline(e.target.value)}
-              className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-4 py-3 border-2 border-navy-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-navy-500 focus:border-navy-500 transition-all"
             />
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value as ContactCategory)}
-              className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-4 py-3 border-2 border-navy-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-navy-500 focus:border-navy-500 transition-all"
             >
               <option value="customer">👥 顧客</option>
               <option value="advisor">👨‍💼 顧問</option>
@@ -480,45 +486,48 @@ export default function Home() {
             <button
               onClick={handleAdd}
               disabled={loading}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
+              className="px-8 py-3 bg-gradient-to-r from-navy-600 to-navy-700 text-white font-semibold rounded-xl hover:from-navy-700 hover:to-navy-800 transition-all duration-200 disabled:opacity-50 shadow-lg hover:shadow-xl"
             >
-              {loading ? '追加中...' : '追加'}
+              {loading ? '追加中...' : '✨ 追加'}
             </button>
           </div>
         </div>
 
         {/* フィルタ・表示モード切替 */}
-        <div className="bg-white rounded-lg shadow p-6 mb-8">
+        <div className="bg-white rounded-2xl shadow-lg border border-navy-100 p-6 mb-8">
           <div className="flex flex-wrap gap-4 items-center">
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value as ContactCategory | 'all')}
-              className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="all">📂 全カテゴリ</option>
-              <option value="advisor">👨‍💼 顧問</option>
-              <option value="agency">🏢 代理店</option>
-              <option value="customer">👥 顧客</option>
-              <option value="other">📋 その他</option>
-            </select>
+            <div className="flex items-center gap-2">
+              <span className="text-navy-700 font-medium">📂</span>
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value as ContactCategory | 'all')}
+                className="px-4 py-2 border-2 border-navy-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-navy-500 focus:border-navy-500 transition-all"
+              >
+                <option value="all">全カテゴリ</option>
+                <option value="advisor">👨‍💼 顧問</option>
+                <option value="agency">🏢 代理店</option>
+                <option value="customer">👥 顧客</option>
+                <option value="other">📋 その他</option>
+              </select>
+            </div>
             <button
               onClick={() => setViewMode(viewMode === 'list' ? 'kanban' : 'list')}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+              className="px-5 py-2 bg-navy-100 text-navy-700 font-medium rounded-xl hover:bg-navy-200 transition-all duration-200"
             >
               {viewMode === 'list' ? '📋 カンバン' : '📝 リスト'}
             </button>
             <button
               onClick={() => setSortMode(sortMode === 'auto' ? 'manual' : 'auto')}
-              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
+              className="px-5 py-2 bg-navy-100 text-navy-700 font-medium rounded-xl hover:bg-navy-200 transition-all duration-200"
             >
               {sortMode === 'auto' ? '🔄 手動並替' : '⚡ 自動並替'}
             </button>
             <button
               onClick={enableNotifications}
-              className={`px-4 py-2 rounded-lg transition ${
+              className={`px-5 py-2 font-medium rounded-xl transition-all duration-200 ${
                 notificationEnabled
-                  ? 'bg-gray-500 text-white cursor-not-allowed'
-                  : 'bg-orange-600 text-white hover:bg-orange-700'
+                  ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
+                  : 'bg-amber-100 text-amber-700 hover:bg-amber-200'
               }`}
               disabled={notificationEnabled}
             >
@@ -531,13 +540,17 @@ export default function Home() {
         {viewMode === 'list' ? (
           <div className="space-y-4">
             {filteredAndSortedContacts.length === 0 ? (
-              <div className="text-center py-12 text-gray-500">
-                {selectedCategory !== 'all' ? '条件に一致する連絡先がありません' : '連絡先がありません'}
+              <div className="text-center py-16">
+                <div className="text-navy-300 text-6xl mb-4">📅</div>
+                <h3 className="text-2xl font-bold text-navy-700 mb-2">連絡先がありません</h3>
+                <p className="text-navy-500">
+                  {selectedCategory !== 'all' ? '条件に一致する連絡先がありません' : '新しい連絡先を追加してみましょう'}
+                </p>
               </div>
             ) : (
             filteredAndSortedContacts.map((contact) => (
-              <div key={contact.id} className={`bg-white rounded-lg shadow p-6 ${
-                contact.status === 'completed' ? 'opacity-60' : ''
+              <div key={contact.id} className={`bg-white rounded-2xl shadow-lg border border-navy-100 p-6 hover:shadow-xl transition-all duration-200 animate-fadeInUp ${
+                contact.status === 'completed' ? 'opacity-60 bg-gray-50' : ''
               }`}>
                 <div className="flex items-start gap-4">
                   <input
@@ -555,14 +568,14 @@ export default function Home() {
                             type="text"
                             value={editName}
                             onChange={(e) => setEditName(e.target.value)}
-                            className="px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="px-3 py-2 border-2 border-navy-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-navy-500 focus:border-navy-500 transition-all"
                             placeholder="名前"
                           />
                           <input
                             type="text"
                             value={editPurpose}
                             onChange={(e) => setEditPurpose(e.target.value)}
-                            className="px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="px-3 py-2 border-2 border-navy-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-navy-500 focus:border-navy-500 transition-all"
                             placeholder="目的"
                           />
                         </div>
@@ -571,12 +584,12 @@ export default function Home() {
                             type="date"
                             value={editDeadline}
                             onChange={(e) => setEditDeadline(e.target.value)}
-                            className="px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="px-3 py-2 border-2 border-navy-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-navy-500 focus:border-navy-500 transition-all"
                           />
                           <select
                             value={editCategory}
                             onChange={(e) => setEditCategory(e.target.value as ContactCategory)}
-                            className="px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="px-3 py-2 border-2 border-navy-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-navy-500 focus:border-navy-500 transition-all"
                           >
                             <option value="customer">👥 顧客</option>
                             <option value="advisor">👨‍💼 顧問</option>
@@ -587,13 +600,13 @@ export default function Home() {
                         <div className="flex gap-2">
                           <button
                             onClick={() => saveEdit(contact.id)}
-                            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+                            className="px-6 py-2 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white font-medium rounded-xl hover:from-emerald-700 hover:to-emerald-800 transition-all duration-200 shadow-md hover:shadow-lg"
                           >
                             保存
                           </button>
                           <button
                             onClick={cancelEdit}
-                            className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition"
+                            className="px-6 py-2 bg-gradient-to-r from-slate-500 to-slate-600 text-white font-medium rounded-xl hover:from-slate-600 hover:to-slate-700 transition-all duration-200 shadow-md hover:shadow-lg"
                           >
                             キャンセル
                           </button>
@@ -604,7 +617,7 @@ export default function Home() {
                       <>
                         <div className="flex items-center gap-3 mb-2 flex-wrap">
                           <h3 className="text-lg font-semibold">{contact.name}</h3>
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getCategoryDisplay(contact.category).color}`}>
+                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getCategoryDisplay(contact.category).color}`}>
                             {getCategoryDisplay(contact.category).label}
                           </span>
                           <span className={`text-sm font-medium ${
@@ -623,13 +636,13 @@ export default function Home() {
                         <div className="flex gap-2 mt-3">
                           <button
                             onClick={() => startEdit(contact)}
-                            className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition"
+                            className="px-4 py-2 text-sm bg-navy-100 text-navy-700 font-medium rounded-xl hover:bg-navy-200 transition-all duration-200"
                           >
                             ✂️ 編集
                           </button>
                           <button
                             onClick={() => deleteContact(contact.id)}
-                            className="px-3 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200 transition"
+                            className="px-4 py-2 text-sm bg-red-100 text-red-700 font-medium rounded-xl hover:bg-red-200 transition-all duration-200"
                           >
                             🗑️ 削除
                           </button>
@@ -637,13 +650,13 @@ export default function Home() {
                             <>
                               <button
                                 onClick={() => moveContact(contact.id, 'up')}
-                                className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition"
+                                className="px-3 py-1 text-sm bg-slate-100 text-slate-700 font-medium rounded-lg hover:bg-slate-200 transition-all duration-200"
                               >
                                 ⬆️
                               </button>
                               <button
                                 onClick={() => moveContact(contact.id, 'down')}
-                                className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition"
+                                className="px-3 py-1 text-sm bg-slate-100 text-slate-700 font-medium rounded-lg hover:bg-slate-200 transition-all duration-200"
                               >
                                 ⬇️
                               </button>
@@ -835,8 +848,11 @@ export default function Home() {
           /* カンバンビュー */
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* 本日 */}
-            <div className="bg-red-50 rounded-lg p-4">
-              <h3 className="text-lg font-bold text-red-800 mb-4 sticky top-0 bg-red-50 py-2">🔴 本日の連絡</h3>
+            <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-2xl p-6 border border-red-200">
+              <h3 className="text-xl font-bold text-red-800 mb-6 sticky top-0 bg-gradient-to-r from-red-50 to-red-100 py-3 rounded-xl flex items-center gap-2">
+                <span className="bg-red-200 p-2 rounded-lg">🔴</span>
+                本日の連絡
+              </h3>
               <div className="space-y-3">
                 {filteredAndSortedContacts
                   .filter(c => {
@@ -844,7 +860,7 @@ export default function Home() {
                     return new Date(c.deadline).toDateString() === today && c.status === 'pending';
                   })
                   .map(contact => (
-                    <div key={contact.id} className="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
+                    <div key={contact.id} className="bg-white rounded-xl p-4 shadow-md hover:shadow-lg transition-all duration-200 border border-gray-100 animate-fadeInUp">
                       <div className="flex items-start gap-2">
                         <input
                           type="checkbox"
@@ -853,9 +869,9 @@ export default function Home() {
                           className="mt-1 w-4 h-4 cursor-pointer"
                         />
                         <div className="flex-1">
-                          <h4 className="font-semibold text-sm">{contact.name}</h4>
-                          <p className="text-xs text-gray-600 mt-1">{contact.purpose}</p>
-                          <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium mt-2 ${getCategoryDisplay(contact.category).color}`}>
+                          <h4 className="font-bold text-sm text-navy-800">{contact.name}</h4>
+                          <p className="text-xs text-navy-600 mt-1">{contact.purpose}</p>
+                          <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold mt-2 ${getCategoryDisplay(contact.category).color}`}>
                             {getCategoryDisplay(contact.category).label}
                           </span>
                         </div>
@@ -866,14 +882,20 @@ export default function Home() {
                   const today = new Date().toDateString();
                   return new Date(c.deadline).toDateString() === today && c.status === 'pending';
                 }).length === 0 && (
-                  <p className="text-gray-400 text-center py-4">本日の連絡はありません</p>
+                  <div className="text-center py-8">
+                  <div className="text-red-300 text-4xl mb-2">🎆</div>
+                  <p className="text-red-400 font-medium">本日の連絡はありません</p>
+                </div>
                 )}
               </div>
             </div>
 
             {/* 期限切れ */}
-            <div className="bg-orange-50 rounded-lg p-4">
-              <h3 className="text-lg font-bold text-orange-800 mb-4 sticky top-0 bg-orange-50 py-2">⚠️ 期限切れ</h3>
+            <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl p-6 border border-orange-200">
+              <h3 className="text-xl font-bold text-orange-800 mb-6 sticky top-0 bg-gradient-to-r from-orange-50 to-orange-100 py-3 rounded-xl flex items-center gap-2">
+                <span className="bg-orange-200 p-2 rounded-lg">⚠️</span>
+                期限切れ
+              </h3>
               <div className="space-y-3">
                 {filteredAndSortedContacts
                   .filter(c => {
@@ -882,7 +904,7 @@ export default function Home() {
                     return deadline < today && deadline.toDateString() !== today.toDateString() && c.status === 'pending';
                   })
                   .map(contact => (
-                    <div key={contact.id} className="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
+                    <div key={contact.id} className="bg-white rounded-xl p-4 shadow-md hover:shadow-lg transition-all duration-200 border border-gray-100 animate-fadeInUp">
                       <div className="flex items-start gap-2">
                         <input
                           type="checkbox"
@@ -891,12 +913,12 @@ export default function Home() {
                           className="mt-1 w-4 h-4 cursor-pointer"
                         />
                         <div className="flex-1">
-                          <h4 className="font-semibold text-sm">{contact.name}</h4>
-                          <p className="text-xs text-gray-600 mt-1">{contact.purpose}</p>
-                          <p className="text-xs text-orange-600 font-medium mt-1">
+                          <h4 className="font-bold text-sm text-navy-800">{contact.name}</h4>
+                          <p className="text-xs text-navy-600 mt-1">{contact.purpose}</p>
+                          <p className="text-xs text-orange-700 font-bold mt-1">
                             {new Date(contact.deadline).toLocaleDateString('ja-JP')}
                           </p>
-                          <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium mt-2 ${getCategoryDisplay(contact.category).color}`}>
+                          <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold mt-2 ${getCategoryDisplay(contact.category).color}`}>
                             {getCategoryDisplay(contact.category).label}
                           </span>
                         </div>
@@ -908,14 +930,20 @@ export default function Home() {
                   const deadline = new Date(c.deadline);
                   return deadline < today && deadline.toDateString() !== today.toDateString() && c.status === 'pending';
                 }).length === 0 && (
-                  <p className="text-gray-400 text-center py-4">期限切れはありません</p>
+                  <div className="text-center py-8">
+                  <div className="text-orange-300 text-4xl mb-2">🎉</div>
+                  <p className="text-orange-400 font-medium">期限切れはありません</p>
+                </div>
                 )}
               </div>
             </div>
 
             {/* 今後の予定 */}
-            <div className="bg-blue-50 rounded-lg p-4">
-              <h3 className="text-lg font-bold text-blue-800 mb-4 sticky top-0 bg-blue-50 py-2">📅 今後の予定</h3>
+            <div className="bg-gradient-to-br from-navy-50 to-navy-100 rounded-2xl p-6 border border-navy-200">
+              <h3 className="text-xl font-bold text-navy-800 mb-6 sticky top-0 bg-gradient-to-r from-navy-50 to-navy-100 py-3 rounded-xl flex items-center gap-2">
+                <span className="bg-navy-200 p-2 rounded-lg">📅</span>
+                今後の予定
+              </h3>
               <div className="space-y-3">
                 {filteredAndSortedContacts
                   .filter(c => {
@@ -924,7 +952,7 @@ export default function Home() {
                     return deadline > today && c.status === 'pending';
                   })
                   .map(contact => (
-                    <div key={contact.id} className="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
+                    <div key={contact.id} className="bg-white rounded-xl p-4 shadow-md hover:shadow-lg transition-all duration-200 border border-gray-100 animate-fadeInUp">
                       <div className="flex items-start gap-2">
                         <input
                           type="checkbox"
@@ -933,16 +961,16 @@ export default function Home() {
                           className="mt-1 w-4 h-4 cursor-pointer"
                         />
                         <div className="flex-1">
-                          <h4 className="font-semibold text-sm">{contact.name}</h4>
-                          <p className="text-xs text-gray-600 mt-1">{contact.purpose}</p>
-                          <p className="text-xs text-blue-600 font-medium mt-1">
+                          <h4 className="font-bold text-sm text-navy-800">{contact.name}</h4>
+                          <p className="text-xs text-navy-600 mt-1">{contact.purpose}</p>
+                          <p className="text-xs text-navy-700 font-bold mt-1">
                             {new Date(contact.deadline).toLocaleDateString('ja-JP')}
                           </p>
-                          <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium mt-2 ${getCategoryDisplay(contact.category).color}`}>
+                          <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold mt-2 ${getCategoryDisplay(contact.category).color}`}>
                             {getCategoryDisplay(contact.category).label}
                           </span>
                           {contact.recurring && (
-                            <span className="block text-xs text-blue-500 mt-1">
+                            <span className="block text-xs text-navy-500 font-medium mt-1">
                               🔄 {contact.recurring === 'daily' ? '毎日' :
                                   contact.recurring === 'weekly' ? '毎週' :
                                   contact.recurring === 'monthly' ? '毎月' : ''}
@@ -957,7 +985,10 @@ export default function Home() {
                   const deadline = new Date(c.deadline);
                   return deadline > today && c.status === 'pending';
                 }).length === 0 && (
-                  <p className="text-gray-400 text-center py-4">今後の予定はありません</p>
+                  <div className="text-center py-8">
+                  <div className="text-navy-300 text-4xl mb-2">😌</div>
+                  <p className="text-navy-400 font-medium">今後の予定はありません</p>
+                </div>
                 )}
               </div>
             </div>
