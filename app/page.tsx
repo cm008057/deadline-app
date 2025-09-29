@@ -53,7 +53,8 @@ export default function Home() {
       const dbContacts = await contactsApi.getAll(user.id);
 
       // LocalStorageにデータがあり、Supabaseが空の場合、自動マイグレーション
-      const stored = localStorage.getItem('contacts');
+      // 旧キー名もチェック
+      let stored = localStorage.getItem('contacts') || localStorage.getItem('agent-details');
       if (stored && dbContacts.length === 0) {
         const localContacts = JSON.parse(stored);
         console.log('自動マイグレーション: LocalStorage → Supabase');
@@ -76,6 +77,7 @@ export default function Home() {
 
         // マイグレーション完了後、LocalStorageをクリア
         localStorage.removeItem('contacts');
+        localStorage.removeItem('agent-details');
         alert('以前のデータを正常に移行しました');
 
         // 再度Supabaseからデータを取得
@@ -109,7 +111,7 @@ export default function Home() {
       }
     } else if (!useDatabase) {
       // LocalStorageから読み込み（ログインなしモード）
-      const stored = localStorage.getItem('contacts');
+      const stored = localStorage.getItem('contacts') || localStorage.getItem('agent-details');
       if (stored) {
         const parsedContacts = JSON.parse(stored).map((contact: Contact) => ({
           ...contact,
