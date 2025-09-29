@@ -54,7 +54,7 @@ export default function Home() {
 
       // LocalStorageにデータがあり、Supabaseが空の場合、自動マイグレーション
       // 旧キー名もチェック
-      let stored = localStorage.getItem('contacts') || localStorage.getItem('agent-details');
+      const stored = localStorage.getItem('contacts') || localStorage.getItem('agent-details');
       if (stored && dbContacts.length === 0) {
         const localContacts = JSON.parse(stored);
         console.log('自動マイグレーション: LocalStorage → Supabase');
