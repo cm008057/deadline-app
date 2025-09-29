@@ -58,6 +58,42 @@ export default function Home() {
     return customCats;
   };
 
+  // カテゴリ名から適切なアイコンを生成する関数
+  const generateCategoryIcon = (categoryName: string): string => {
+    const name = categoryName.toLowerCase();
+
+    // キーワードベースでアイコンを選択
+    if (name.includes('営業') || name.includes('セールス')) return '💼';
+    if (name.includes('パートナー') || name.includes('提携')) return '🤝';
+    if (name.includes('技術') || name.includes('エンジニア') || name.includes('開発')) return '⚙️';
+    if (name.includes('マーケ') || name.includes('広告')) return '📢';
+    if (name.includes('サポート') || name.includes('支援')) return '🛠️';
+    if (name.includes('投資') || name.includes('ファンド')) return '💰';
+    if (name.includes('法務') || name.includes('弁護士')) return '⚖️';
+    if (name.includes('会計') || name.includes('税理士')) return '📊';
+    if (name.includes('研究') || name.includes('学術')) return '🔬';
+    if (name.includes('メディア') || name.includes('報道')) return '📺';
+    if (name.includes('政府') || name.includes('行政')) return '🏛️';
+    if (name.includes('病院') || name.includes('医療')) return '🏥';
+    if (name.includes('学校') || name.includes('教育')) return '🎓';
+    if (name.includes('金融') || name.includes('銀行')) return '🏦';
+    if (name.includes('不動産')) return '🏘️';
+    if (name.includes('製造') || name.includes('工場')) return '🏭';
+    if (name.includes('物流') || name.includes('配送')) return '🚚';
+    if (name.includes('小売') || name.includes('店舗')) return '🏪';
+    if (name.includes('飲食') || name.includes('レストラン')) return '🍽️';
+    if (name.includes('旅行') || name.includes('観光')) return '✈️';
+    if (name.includes('イベント') || name.includes('企画')) return '🎪';
+    if (name.includes('デザイン') || name.includes('クリエイティブ')) return '🎨';
+    if (name.includes('コンサル')) return '📝';
+    if (name.includes('人材') || name.includes('採用')) return '👔';
+
+    // デフォルトアイコン（ランダム要素を加えて重複を避ける）
+    const defaultIcons = ['🌟', '🚀', '💎', '🎯', '⭐', '🔥', '✨', '🎉', '🌈', '🎪'];
+    const index = categoryName.length % defaultIcons.length;
+    return defaultIcons[index];
+  };
+
   const loadContacts = useCallback(async () => {
     setLoading(true);
 
@@ -597,7 +633,7 @@ export default function Home() {
     if (category && !['advisor', 'agency', 'customer', 'other'].includes(category)) {
       return {
         label: category,
-        emoji: '🏷️',
+        emoji: generateCategoryIcon(category),
         color: 'bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white'
       };
     }
@@ -724,10 +760,10 @@ export default function Home() {
                 <option value="customer">👥 顧客</option>
                 <option value="advisor">🎯 顧問</option>
                 <option value="agency">🏢 代理店</option>
-                <option value="other">📌 その他（新規追加）</option>
                 {customCategories.map(cat => (
-                  <option key={cat} value={cat}>🏷️ {cat}</option>
+                  <option key={cat} value={cat}>{generateCategoryIcon(cat)} {cat}</option>
                 ))}
+                <option value="other">📌 その他（新規追加）</option>
               </select>
               {showCustomInput && (
                 <input
@@ -768,13 +804,13 @@ export default function Home() {
                 className="px-3 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium text-gray-700 cursor-pointer hover:bg-gradient-to-r hover:from-gray-100 hover:to-gray-200"
               >
                 <option value="all">🎨 全カテゴリ</option>
+                <option value="customer">👥 顧客のみ</option>
                 <option value="advisor">🎯 顧問のみ</option>
                 <option value="agency">🏢 代理店のみ</option>
-                <option value="customer">👥 顧客のみ</option>
-                <option value="other">📌 その他のみ</option>
                 {customCategories.map(cat => (
-                  <option key={cat} value={cat}>🏷️ {cat}のみ</option>
+                  <option key={cat} value={cat}>{generateCategoryIcon(cat)} {cat}のみ</option>
                 ))}
+                <option value="other">📌 その他のみ</option>
               </select>
               <button
                 onClick={() => setViewMode(viewMode === 'list' ? 'kanban' : 'list')}
@@ -861,10 +897,10 @@ export default function Home() {
                             <option value="customer">👥 顧客</option>
                             <option value="advisor">🎯 顧問</option>
                             <option value="agency">🏢 代理店</option>
-                            <option value="other">📌 その他</option>
                             {customCategories.map(cat => (
-                              <option key={cat} value={cat}>🏷️ {cat}</option>
+                              <option key={cat} value={cat}>{generateCategoryIcon(cat)} {cat}</option>
                             ))}
+                            <option value="other">📌 その他</option>
                           </select>
                         </div>
                         <div className="flex gap-2">
