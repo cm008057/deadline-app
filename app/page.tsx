@@ -50,6 +50,14 @@ export default function Home() {
   const [authLoading, setAuthLoading] = useState(true);
   const router = useRouter();
 
+  // カスタムカテゴリを抽出する関数
+  const extractCustomCategories = (contacts: Contact[]): string[] => {
+    const standardCategories = ['advisor', 'agency', 'customer', 'other'];
+    const allCategories = contacts.map(c => c.category).filter(Boolean);
+    const customCats = [...new Set(allCategories.filter(cat => !standardCategories.includes(cat)))];
+    return customCats;
+  };
+
   const loadContacts = useCallback(async () => {
     setLoading(true);
 
@@ -81,6 +89,11 @@ export default function Home() {
           recurring: dbContact.recurring
         }));
         setContacts(formattedContacts);
+
+        // カスタムカテゴリを抽出
+        const customCats = extractCustomCategories(formattedContacts);
+        setCustomCategories(customCats);
+
         setLoading(false);
         return;
       }
@@ -127,6 +140,10 @@ export default function Home() {
           recurring: dbContact.recurring
         }));
         setContacts(formattedContacts);
+
+        // カスタムカテゴリを抽出
+        const customCats = extractCustomCategories(formattedContacts);
+        setCustomCategories(customCats);
       } else {
         // 通常のデータ読み込み
         const formattedContacts: Contact[] = dbContacts.map(dbContact => ({
@@ -141,6 +158,10 @@ export default function Home() {
           recurring: dbContact.recurring
         }));
         setContacts(formattedContacts);
+
+        // カスタムカテゴリを抽出
+        const customCats = extractCustomCategories(formattedContacts);
+        setCustomCategories(customCats);
       }
     } else if (!useDatabase) {
       // LocalStorageから読み込み（ログインなしモード）
@@ -151,13 +172,18 @@ export default function Home() {
           category: contact.category || 'customer'
         }));
         setContacts(parsedContacts);
-      }
-    }
 
-    // カスタムカテゴリを読み込み
-    const storedCategories = localStorage.getItem('customCategories');
-    if (storedCategories) {
-      setCustomCategories(JSON.parse(storedCategories));
+        // カスタムカテゴリを抽出
+        const customCats = extractCustomCategories(parsedContacts);
+        setCustomCategories(customCats);
+      }
+
+      // LocalStorageからカスタムカテゴリも読み込み（バックアップとして）
+      const storedCategories = localStorage.getItem('customCategories');
+      if (storedCategories) {
+        const localCustomCats = JSON.parse(storedCategories);
+        setCustomCategories(prev => [...new Set([...prev, ...localCustomCats])]);
+      }
     }
 
     setLoading(false);
