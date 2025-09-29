@@ -6,7 +6,7 @@ import { contactsApi, isSupabaseConfigured, supabase } from '../lib/supabase';
 import type { User } from '@supabase/supabase-js';
 
 type ContactStatus = 'pending' | 'completed';
-type ContactCategory = 'advisor' | 'agency' | 'customer' | 'other' | string;
+type ContactCategory = string;
 
 interface Contact {
   id: string;
@@ -43,7 +43,7 @@ export default function Home() {
   const [editName, setEditName] = useState('');
   const [editPurpose, setEditPurpose] = useState('');
   const [editDeadline, setEditDeadline] = useState('');
-  const [editCategory, setEditCategory] = useState<ContactCategory>('customer');
+  const [editCategory, setEditCategory] = useState<string>('customer');
   const [sortMode, setSortMode] = useState<'auto' | 'manual'>('auto');
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
@@ -553,7 +553,7 @@ export default function Home() {
   };
 
   // カテゴリ表示用
-  const getCategoryDisplay = (category: ContactCategory | undefined, customName?: string) => {
+  const getCategoryDisplay = (category: ContactCategory | undefined) => {
     const categories: Record<string, { label: string; emoji: string; color: string }> = {
       advisor: { label: '顧問', emoji: '🎯', color: 'bg-gradient-to-r from-blue-600 to-blue-700 text-white' },
       agency: { label: '代理店', emoji: '🏢', color: 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white' },
@@ -816,7 +816,7 @@ export default function Home() {
                           />
                           <select
                             value={editCategory}
-                            onChange={(e) => setEditCategory(e.target.value as ContactCategory)}
+                            onChange={(e) => setEditCategory(e.target.value)}
                             className="px-3 py-2 border-2 border-navy-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-navy-500 focus:border-navy-500 transition-all"
                           >
                             <option value="customer">👥 顧客</option>
