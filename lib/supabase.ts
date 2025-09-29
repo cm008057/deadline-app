@@ -47,9 +47,12 @@ export const contactsApi = {
       .from('contacts')
       .select('*');
 
-    // ユーザーIDが指定されている場合のみフィルタリング
+    // ユーザーIDが指定されている場合はフィルタリング
+    // undefinedが明示的に渡された場合はuser_idがNULLのデータを取得
     if (userId) {
       query = query.eq('user_id', userId);
+    } else if (userId === undefined) {
+      query = query.is('user_id', null);
     }
 
     const { data, error } = await query.order('deadline', { ascending: true });

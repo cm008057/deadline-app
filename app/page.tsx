@@ -49,8 +49,36 @@ export default function Home() {
     setLoading(true);
 
     if (useDatabase && user) {
-      // Supabaseから読み込み（ユーザー固有のデータ）
-      const dbContacts = await contactsApi.getAll(user.id);
+      // Supabaseから読み込み（ユーザー固有のデータ + 移行前のデータ）
+      const userContacts = await contactsApi.getAll(user.id);
+      const legacyContacts = await contactsApi.getAll(undefined); // user_idがNULLのデータ
+      const dbContacts = [...userContacts, ...legacyContacts];
+
+      // 移行前のデータ（user_idがNULL）がある場合、現在のユーザーに紐付ける
+      if (legacyContacts.length > 0) {
+        console.log('移行前のデータを発見。ユーザーに紐付けています...');
+        for (const contact of legacyContacts) {
+          if (contact.id) {
+            await contactsApi.update(contact.id, { user_id: user.id });
+          }
+        }
+        // 更新後、再度読み込み
+        const updatedContacts = await contactsApi.getAll(user.id);
+        const formattedContacts: Contact[] = updatedContacts.map(dbContact => ({
+          id: dbContact.id || '',
+          name: dbContact.name,
+          purpose: dbContact.purpose,
+          deadline: dbContact.deadline,
+          status: dbContact.status,
+          category: dbContact.category || 'customer',
+          createdAt: dbContact.created_at || '',
+          completedAt: dbContact.completed_at || undefined,
+          recurring: dbContact.recurring
+        }));
+        setContacts(formattedContacts);
+        setLoading(false);
+        return;
+      }
 
       // LocalStorageにデータがあり、Supabaseが空の場合、自動マイグレーション
       // 旧キー名もチェック
