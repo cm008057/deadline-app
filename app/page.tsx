@@ -50,6 +50,8 @@ export default function Home() {
   const [sortMode, setSortMode] = useState<'auto' | 'manual'>('auto');
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [history, setHistory] = useState<Contact[][]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
   const router = useRouter();
 
   // カスタムカテゴリを抽出する関数
@@ -116,6 +118,32 @@ export default function Home() {
 
       return contact;
     });
+  };
+
+  // 履歴を保存する関数
+  const saveToHistory = (newContacts: Contact[]) => {
+    const newHistory = history.slice(0, historyIndex + 1);
+    newHistory.push([...newContacts]);
+    setHistory(newHistory);
+    setHistoryIndex(newHistory.length - 1);
+  };
+
+  // Undo機能
+  const undo = () => {
+    if (historyIndex > 0) {
+      const previousState = history[historyIndex - 1];
+      setContacts(previousState);
+      setHistoryIndex(historyIndex - 1);
+    }
+  };
+
+  // Redo機能
+  const redo = () => {
+    if (historyIndex < history.length - 1) {
+      const nextState = history[historyIndex + 1];
+      setContacts(nextState);
+      setHistoryIndex(historyIndex + 1);
+    }
   };
 
   const loadContacts = useCallback(async () => {
@@ -520,6 +548,9 @@ export default function Home() {
     const contact = contacts.find(c => c.id === id);
     if (!contact) return;
 
+    // 現在の状態を履歴に保存
+    saveToHistory(contacts);
+
     const newStatus = contact.status === 'pending' ? 'completed' : 'pending';
     const completedAt = newStatus === 'completed' ? new Date().toISOString() : undefined;
 
@@ -532,7 +563,7 @@ export default function Home() {
     }
 
     // ローカル状態を更新
-    setContacts(contacts.map(contact => {
+    const updatedContacts = contacts.map(contact => {
       if (contact.id === id) {
         if (newStatus === 'completed') {
           setEditingId(id);
@@ -542,7 +573,8 @@ export default function Home() {
         }
       }
       return contact;
-    }));
+    });
+    setContacts(updatedContacts);
   };
 
   // 次のアクション選択
@@ -629,10 +661,6 @@ export default function Home() {
       // 手動ソートモードの場合はスキップ
       if (sortMode === 'manual') return 0;
 
-      // 完了済みは下位
-      if (a.status === 'completed' && b.status === 'pending') return 1;
-      if (a.status === 'pending' && b.status === 'completed') return -1;
-
       // ソートに使用する期日（期限切れの場合は元の期日、そうでなければ現在の期日）
       const getSortDate = (contact: Contact) => {
         return contact.isOverdue && contact.originalDeadline
@@ -643,7 +671,7 @@ export default function Home() {
       const aSortDate = getSortDate(a);
       const bSortDate = getSortDate(b);
 
-      // 期日順（期限切れも元の期日で並ぶ）
+      // 期日順（期限切れも元の期日で並ぶ、完了済みも同じ位置に残る）
       return new Date(aSortDate).getTime() - new Date(bSortDate).getTime();
     });
 
@@ -743,17 +771,41 @@ export default function Home() {
                 顧問・代理店・顧客との連絡を効率的に管理
               </p>
             </div>
-            {useDatabase && user && (
-              <div className="flex flex-row items-center gap-2 sm:gap-4 text-white">
-                <span className="text-xs sm:text-sm opacity-75 truncate max-w-[120px] sm:max-w-[200px]">{user.email}</span>
+            <div className="flex flex-row items-center gap-2 sm:gap-4 text-white">
+              <div className="flex items-center gap-1">
                 <button
-                  onClick={handleLogout}
-                  className="px-3 sm:px-4 py-1.5 sm:py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-all text-xs sm:text-sm font-medium whitespace-nowrap"
+                  onClick={undo}
+                  disabled={historyIndex <= 0}
+                  className="p-1.5 bg-white/10 hover:bg-white/20 rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                  title="元に戻す"
                 >
-                  ログアウト
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                  </svg>
+                </button>
+                <button
+                  onClick={redo}
+                  disabled={historyIndex >= history.length - 1}
+                  className="p-1.5 bg-white/10 hover:bg-white/20 rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                  title="やり直す"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 10h-10a8 8 0 00-8 8v2m18-10l-6 6m6-6l-6-6" />
+                  </svg>
                 </button>
               </div>
-            )}
+              {useDatabase && user && (
+                <>
+                  <span className="text-xs sm:text-sm opacity-75 truncate max-w-[120px] sm:max-w-[200px]">{user.email}</span>
+                  <button
+                    onClick={handleLogout}
+                    className="px-3 sm:px-4 py-1.5 sm:py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-all text-xs sm:text-sm font-medium whitespace-nowrap"
+                  >
+                    ログアウト
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </div>
