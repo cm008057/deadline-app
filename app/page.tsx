@@ -771,41 +771,17 @@ export default function Home() {
                 顧問・代理店・顧客との連絡を効率的に管理
               </p>
             </div>
-            <div className="flex flex-row items-center gap-2 sm:gap-4 text-white">
-              <div className="flex items-center gap-1">
+            {useDatabase && user && (
+              <div className="flex flex-row items-center gap-2 sm:gap-4 text-white">
+                <span className="text-xs sm:text-sm opacity-75 truncate max-w-[120px] sm:max-w-[200px]">{user.email}</span>
                 <button
-                  onClick={undo}
-                  disabled={historyIndex <= 0}
-                  className="p-1.5 bg-white/10 hover:bg-white/20 rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-                  title="元に戻す"
+                  onClick={handleLogout}
+                  className="px-3 sm:px-4 py-1.5 sm:py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-all text-xs sm:text-sm font-medium whitespace-nowrap"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
-                  </svg>
-                </button>
-                <button
-                  onClick={redo}
-                  disabled={historyIndex >= history.length - 1}
-                  className="p-1.5 bg-white/10 hover:bg-white/20 rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-                  title="やり直す"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 10h-10a8 8 0 00-8 8v2m18-10l-6 6m6-6l-6-6" />
-                  </svg>
+                  ログアウト
                 </button>
               </div>
-              {useDatabase && user && (
-                <>
-                  <span className="text-xs sm:text-sm opacity-75 truncate max-w-[120px] sm:max-w-[200px]">{user.email}</span>
-                  <button
-                    onClick={handleLogout}
-                    className="px-3 sm:px-4 py-1.5 sm:py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-all text-xs sm:text-sm font-medium whitespace-nowrap"
-                  >
-                    ログアウト
-                  </button>
-                </>
-              )}
-            </div>
+            )}
           </div>
         </div>
       </div>
@@ -921,6 +897,28 @@ export default function Home() {
               >
                 {sortMode === 'auto' ? '🔄 手動ソート' : '⚡ 自動ソート'}
               </button>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={undo}
+                  disabled={historyIndex <= 0}
+                  className="p-2 bg-gradient-to-r from-slate-50 to-slate-100 hover:from-slate-100 hover:to-slate-200 rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed border border-slate-200"
+                  title="元に戻す"
+                >
+                  <svg className="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                  </svg>
+                </button>
+                <button
+                  onClick={redo}
+                  disabled={historyIndex >= history.length - 1}
+                  className="p-2 bg-gradient-to-r from-slate-50 to-slate-100 hover:from-slate-100 hover:to-slate-200 rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed border border-slate-200"
+                  title="やり直す"
+                >
+                  <svg className="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 10h-10a8 8 0 00-8 8v2m18-10l-6 6m6-6l-6-6" />
+                  </svg>
+                </button>
+              </div>
             </div>
             <button
               onClick={enableNotifications}
