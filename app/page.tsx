@@ -563,13 +563,13 @@ export default function Home() {
     }
 
     // ローカル状態を更新
-    const updatedContacts = contacts.map(contact => {
+    const updatedContacts: Contact[] = contacts.map(contact => {
       if (contact.id === id) {
         if (newStatus === 'completed') {
           setEditingId(id);
-          return { ...contact, status: 'completed', completedAt };
+          return { ...contact, status: 'completed' as ContactStatus, completedAt };
         } else {
-          return { ...contact, status: 'pending', completedAt: undefined };
+          return { ...contact, status: 'pending' as ContactStatus, completedAt: undefined };
         }
       }
       return contact;
