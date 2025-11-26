@@ -447,6 +447,51 @@ export default function Home() {
     setContacts(contacts.filter(c => c.id !== id));
   };
 
+  // 期限切れを一括で本日に更新
+  const bulkUpdateOverdueToToday = async () => {
+    const today = new Date().toISOString().split('T')[0];
+    const overdueContacts = contacts.filter(c => c.isOverdue && c.status === 'pending');
+
+    if (overdueContacts.length === 0) {
+      alert('期限切れの連絡先はありません');
+      return;
+    }
+
+    if (!confirm(`${overdueContacts.length}件の期限切れを本日(${today})に更新しますか？`)) {
+      return;
+    }
+
+    setLoading(true);
+
+    // 履歴を保存
+    saveToHistory(contacts);
+
+    const updatedContacts = contacts.map(contact => {
+      if (contact.isOverdue && contact.status === 'pending') {
+        return {
+          ...contact,
+          deadline: today,
+          isOverdue: false,
+          originalDeadline: undefined
+        };
+      }
+      return contact;
+    });
+
+    // データベースを更新
+    if (useDatabase) {
+      for (const contact of overdueContacts) {
+        await contactsApi.update(contact.id, {
+          deadline: today
+        });
+      }
+    }
+
+    setContacts(updatedContacts);
+    setLoading(false);
+    alert(`${overdueContacts.length}件の期日を本日に更新しました`);
+  };
+
   // 順序変更
   const moveContact = (id: string, direction: 'up' | 'down') => {
     const index = contacts.findIndex(c => c.id === id);
@@ -920,17 +965,30 @@ export default function Home() {
                 </button>
               </div>
             </div>
-            <button
-              onClick={enableNotifications}
-              className={`px-3 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm font-semibold rounded-xl sm:rounded-2xl transition-all duration-200 ${
-                notificationEnabled
-                  ? 'bg-green-100 text-green-700 cursor-not-allowed border border-green-200'
-                  : 'bg-gradient-to-r from-amber-400 to-orange-400 text-white hover:from-amber-500 hover:to-orange-500 shadow-lg hover:shadow-xl'
-              }`}
-              disabled={notificationEnabled}
-            >
-              {notificationEnabled ? '✅ 通知ON' : '🔔 通知をON'}
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={bulkUpdateOverdueToToday}
+                disabled={loading || contacts.filter(c => c.isOverdue && c.status === 'pending').length === 0}
+                className={`px-3 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm font-semibold rounded-xl sm:rounded-2xl transition-all duration-200 ${
+                  contacts.filter(c => c.isOverdue && c.status === 'pending').length > 0
+                    ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600 shadow-lg hover:shadow-xl'
+                    : 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'
+                }`}
+              >
+                ⚡ 期限切れを本日に ({contacts.filter(c => c.isOverdue && c.status === 'pending').length}件)
+              </button>
+              <button
+                onClick={enableNotifications}
+                className={`px-3 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm font-semibold rounded-xl sm:rounded-2xl transition-all duration-200 ${
+                  notificationEnabled
+                    ? 'bg-green-100 text-green-700 cursor-not-allowed border border-green-200'
+                    : 'bg-gradient-to-r from-amber-400 to-orange-400 text-white hover:from-amber-500 hover:to-orange-500 shadow-lg hover:shadow-xl'
+                }`}
+                disabled={notificationEnabled}
+              >
+                {notificationEnabled ? '✅ 通知ON' : '🔔 通知をON'}
+              </button>
+            </div>
           </div>
         </div>
 
