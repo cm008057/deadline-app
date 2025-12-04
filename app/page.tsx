@@ -760,6 +760,7 @@ export default function Home() {
   // ドラッグ&ドロップハンドラー
   const handleDragStart = (e: React.DragEvent, contactId: string) => {
     setDraggedContactId(contactId);
+    e.dataTransfer.setData('text/plain', contactId);
     e.dataTransfer.effectAllowed = 'move';
   };
 
@@ -1424,10 +1425,10 @@ export default function Home() {
                   .map(contact => (
                     <div
                       key={contact.id}
-                      draggable
+                      draggable={true}
                       onDragStart={(e) => handleDragStart(e, contact.id)}
                       onDragEnd={handleDragEnd}
-                      className={`bg-white rounded-lg sm:rounded-xl p-2.5 sm:p-3 shadow-sm sm:shadow-md hover:shadow-lg transition-all duration-200 border border-gray-100 cursor-grab active:cursor-grabbing ${
+                      className={`bg-white rounded-lg sm:rounded-xl p-2.5 sm:p-3 shadow-sm sm:shadow-md hover:shadow-lg transition-all duration-200 border border-gray-100 cursor-grab active:cursor-grabbing select-none ${
                         draggedContactId === contact.id ? 'opacity-50 scale-95' : ''
                       }`}
                     >
@@ -1436,9 +1437,11 @@ export default function Home() {
                           type="checkbox"
                           checked={contact.status === 'completed'}
                           onChange={() => toggleComplete(contact.id)}
+                          onMouseDown={(e) => e.stopPropagation()}
                           className="mt-1 w-4 h-4 cursor-pointer"
+                          draggable={false}
                         />
-                        <div className="flex-1">
+                        <div className="flex-1 pointer-events-none">
                           <h4 className="font-bold text-xs sm:text-sm text-navy-800">{contact.name}</h4>
                           <p className="text-xs text-navy-600 mt-0.5 sm:mt-1 line-clamp-2">{contact.purpose}</p>
                           <p className="text-xs text-orange-700 font-bold mt-1">
@@ -1492,10 +1495,10 @@ export default function Home() {
                   .map(contact => (
                     <div
                       key={contact.id}
-                      draggable
+                      draggable={true}
                       onDragStart={(e) => handleDragStart(e, contact.id)}
                       onDragEnd={handleDragEnd}
-                      className={`bg-white rounded-lg sm:rounded-xl p-2.5 sm:p-3 shadow-sm sm:shadow-md hover:shadow-lg transition-all duration-200 border border-gray-100 cursor-grab active:cursor-grabbing ${
+                      className={`bg-white rounded-lg sm:rounded-xl p-2.5 sm:p-3 shadow-sm sm:shadow-md hover:shadow-lg transition-all duration-200 border border-gray-100 cursor-grab active:cursor-grabbing select-none ${
                         draggedContactId === contact.id ? 'opacity-50 scale-95' : ''
                       }`}
                     >
@@ -1504,9 +1507,11 @@ export default function Home() {
                           type="checkbox"
                           checked={contact.status === 'completed'}
                           onChange={() => toggleComplete(contact.id)}
+                          onMouseDown={(e) => e.stopPropagation()}
                           className="mt-1 w-4 h-4 cursor-pointer"
+                          draggable={false}
                         />
-                        <div className="flex-1">
+                        <div className="flex-1 pointer-events-none">
                           <h4 className="font-bold text-xs sm:text-sm text-navy-800">{contact.name}</h4>
                           <p className="text-xs text-navy-600 mt-0.5 sm:mt-1 line-clamp-2">{contact.purpose}</p>
                           <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold mt-2 ${getCategoryDisplay(contact.category).color}`}>
@@ -1554,10 +1559,10 @@ export default function Home() {
                   .map(contact => (
                     <div
                       key={contact.id}
-                      draggable
+                      draggable={true}
                       onDragStart={(e) => handleDragStart(e, contact.id)}
                       onDragEnd={handleDragEnd}
-                      className={`bg-white rounded-lg sm:rounded-xl p-2.5 sm:p-3 shadow-sm sm:shadow-md hover:shadow-lg transition-all duration-200 border border-gray-100 cursor-grab active:cursor-grabbing ${
+                      className={`bg-white rounded-lg sm:rounded-xl p-2.5 sm:p-3 shadow-sm sm:shadow-md hover:shadow-lg transition-all duration-200 border border-gray-100 cursor-grab active:cursor-grabbing select-none ${
                         draggedContactId === contact.id ? 'opacity-50 scale-95' : ''
                       }`}
                     >
@@ -1566,9 +1571,11 @@ export default function Home() {
                           type="checkbox"
                           checked={contact.status === 'completed'}
                           onChange={() => toggleComplete(contact.id)}
+                          onMouseDown={(e) => e.stopPropagation()}
                           className="mt-1 w-4 h-4 cursor-pointer"
+                          draggable={false}
                         />
-                        <div className="flex-1">
+                        <div className="flex-1 pointer-events-none">
                           <h4 className="font-bold text-xs sm:text-sm text-navy-800">{contact.name}</h4>
                           <p className="text-xs text-navy-600 mt-0.5 sm:mt-1 line-clamp-2">{contact.purpose}</p>
                           <p className="text-xs text-blue-700 font-bold mt-1">
