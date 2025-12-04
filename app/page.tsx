@@ -777,7 +777,7 @@ export default function Home() {
     e.preventDefault();
     if (!draggedContactId) return;
 
-    const contact = contacts.find(c => c.id === draggedContactId);
+    const contact = contacts.find(c => String(c.id) === String(draggedContactId));
     if (!contact) return;
 
     // 履歴を保存
@@ -785,16 +785,23 @@ export default function Home() {
 
     let newDeadline: string;
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
+
+    // ローカルタイムゾーンで日付をフォーマット (YYYY-MM-DD)
+    const formatLocalDate = (date: Date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
 
     if (targetColumn === 'today') {
       // 本日に移動 → 期日を今日に設定
-      newDeadline = today.toISOString().split('T')[0];
+      newDeadline = formatLocalDate(today);
     } else if (targetColumn === 'future') {
       // 今後に移動 → 期日を明日に設定
       const tomorrow = new Date(today);
       tomorrow.setDate(tomorrow.getDate() + 1);
-      newDeadline = tomorrow.toISOString().split('T')[0];
+      newDeadline = formatLocalDate(tomorrow);
     } else {
       // 期限切れには基本的にドロップしない（過去の日付は設定しない）
       setDraggedContactId(null);
@@ -810,7 +817,7 @@ export default function Home() {
 
     // ローカル状態を更新
     const updatedContacts = contacts.map(c => {
-      if (c.id === draggedContactId) {
+      if (String(c.id) === String(draggedContactId)) {
         return {
           ...c,
           deadline: newDeadline,
@@ -1428,20 +1435,21 @@ export default function Home() {
                       draggable={true}
                       onDragStart={(e) => handleDragStart(e, contact.id)}
                       onDragEnd={handleDragEnd}
-                      className={`bg-white rounded-lg sm:rounded-xl p-2.5 sm:p-3 shadow-sm sm:shadow-md hover:shadow-lg transition-all duration-200 border border-gray-100 cursor-grab active:cursor-grabbing select-none ${
+                      className={`bg-white rounded-lg sm:rounded-xl p-2.5 sm:p-3 shadow-sm sm:shadow-md hover:shadow-lg transition-all duration-200 border border-gray-100 ${
                         draggedContactId === contact.id ? 'opacity-50 scale-95' : ''
                       }`}
                     >
                       <div className="flex items-start gap-2">
+                        <div className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 select-none" title="ドラッグして移動">
+                          ⋮⋮
+                        </div>
                         <input
                           type="checkbox"
                           checked={contact.status === 'completed'}
                           onChange={() => toggleComplete(contact.id)}
-                          onMouseDown={(e) => e.stopPropagation()}
                           className="mt-1 w-4 h-4 cursor-pointer"
-                          draggable={false}
                         />
-                        <div className="flex-1 pointer-events-none">
+                        <div className="flex-1">
                           <h4 className="font-bold text-xs sm:text-sm text-navy-800">{contact.name}</h4>
                           <p className="text-xs text-navy-600 mt-0.5 sm:mt-1 line-clamp-2">{contact.purpose}</p>
                           <p className="text-xs text-orange-700 font-bold mt-1">
@@ -1498,20 +1506,21 @@ export default function Home() {
                       draggable={true}
                       onDragStart={(e) => handleDragStart(e, contact.id)}
                       onDragEnd={handleDragEnd}
-                      className={`bg-white rounded-lg sm:rounded-xl p-2.5 sm:p-3 shadow-sm sm:shadow-md hover:shadow-lg transition-all duration-200 border border-gray-100 cursor-grab active:cursor-grabbing select-none ${
+                      className={`bg-white rounded-lg sm:rounded-xl p-2.5 sm:p-3 shadow-sm sm:shadow-md hover:shadow-lg transition-all duration-200 border border-gray-100 ${
                         draggedContactId === contact.id ? 'opacity-50 scale-95' : ''
                       }`}
                     >
                       <div className="flex items-start gap-2">
+                        <div className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 select-none" title="ドラッグして移動">
+                          ⋮⋮
+                        </div>
                         <input
                           type="checkbox"
                           checked={contact.status === 'completed'}
                           onChange={() => toggleComplete(contact.id)}
-                          onMouseDown={(e) => e.stopPropagation()}
                           className="mt-1 w-4 h-4 cursor-pointer"
-                          draggable={false}
                         />
-                        <div className="flex-1 pointer-events-none">
+                        <div className="flex-1">
                           <h4 className="font-bold text-xs sm:text-sm text-navy-800">{contact.name}</h4>
                           <p className="text-xs text-navy-600 mt-0.5 sm:mt-1 line-clamp-2">{contact.purpose}</p>
                           <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold mt-2 ${getCategoryDisplay(contact.category).color}`}>
@@ -1562,20 +1571,21 @@ export default function Home() {
                       draggable={true}
                       onDragStart={(e) => handleDragStart(e, contact.id)}
                       onDragEnd={handleDragEnd}
-                      className={`bg-white rounded-lg sm:rounded-xl p-2.5 sm:p-3 shadow-sm sm:shadow-md hover:shadow-lg transition-all duration-200 border border-gray-100 cursor-grab active:cursor-grabbing select-none ${
+                      className={`bg-white rounded-lg sm:rounded-xl p-2.5 sm:p-3 shadow-sm sm:shadow-md hover:shadow-lg transition-all duration-200 border border-gray-100 ${
                         draggedContactId === contact.id ? 'opacity-50 scale-95' : ''
                       }`}
                     >
                       <div className="flex items-start gap-2">
+                        <div className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 select-none" title="ドラッグして移動">
+                          ⋮⋮
+                        </div>
                         <input
                           type="checkbox"
                           checked={contact.status === 'completed'}
                           onChange={() => toggleComplete(contact.id)}
-                          onMouseDown={(e) => e.stopPropagation()}
                           className="mt-1 w-4 h-4 cursor-pointer"
-                          draggable={false}
                         />
-                        <div className="flex-1 pointer-events-none">
+                        <div className="flex-1">
                           <h4 className="font-bold text-xs sm:text-sm text-navy-800">{contact.name}</h4>
                           <p className="text-xs text-navy-600 mt-0.5 sm:mt-1 line-clamp-2">{contact.purpose}</p>
                           <p className="text-xs text-blue-700 font-bold mt-1">
