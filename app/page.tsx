@@ -52,6 +52,7 @@ export default function Home() {
   const [authLoading, setAuthLoading] = useState(true);
   const [history, setHistory] = useState<Contact[][]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
+  const [draggedContactId, setDraggedContactId] = useState<string | null>(null);
   const router = useRouter();
 
   // カスタムカテゴリを抽出する関数
@@ -756,6 +757,75 @@ export default function Home() {
     });
   };
 
+  // ドラッグ&ドロップハンドラー
+  const handleDragStart = (e: React.DragEvent, contactId: string) => {
+    setDraggedContactId(contactId);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragEnd = () => {
+    setDraggedContactId(null);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDrop = async (e: React.DragEvent, targetColumn: 'overdue' | 'today' | 'future') => {
+    e.preventDefault();
+    if (!draggedContactId) return;
+
+    const contact = contacts.find(c => c.id === draggedContactId);
+    if (!contact) return;
+
+    // 履歴を保存
+    saveToHistory(contacts);
+
+    let newDeadline: string;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (targetColumn === 'today') {
+      // 本日に移動 → 期日を今日に設定
+      newDeadline = today.toISOString().split('T')[0];
+    } else if (targetColumn === 'future') {
+      // 今後に移動 → 期日を明日に設定
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      newDeadline = tomorrow.toISOString().split('T')[0];
+    } else {
+      // 期限切れには基本的にドロップしない（過去の日付は設定しない）
+      setDraggedContactId(null);
+      return;
+    }
+
+    // データベースを更新
+    if (useDatabase) {
+      await contactsApi.update(draggedContactId, {
+        deadline: newDeadline
+      });
+    }
+
+    // ローカル状態を更新
+    const updatedContacts = contacts.map(c => {
+      if (c.id === draggedContactId) {
+        return {
+          ...c,
+          deadline: newDeadline,
+          isOverdue: false,
+          originalDeadline: undefined
+        };
+      }
+      return c;
+    });
+
+    // 期限切れチェック
+    const checkedContacts = checkAndFixOverdueContacts(updatedContacts);
+    setContacts(checkedContacts);
+    setDraggedContactId(null);
+  };
+
   // カテゴリ表示用
   const getCategoryDisplay = (category: ContactCategory | undefined) => {
     const categories: Record<string, { label: string; emoji: string; color: string }> = {
@@ -1333,65 +1403,34 @@ export default function Home() {
         </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* 本日 */}
-            <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-red-200">
-              <h3 className="text-sm sm:text-base font-bold text-red-800 mb-3 sm:mb-4 sticky top-0 bg-gradient-to-r from-red-50 to-red-100 py-2 rounded-lg flex items-center gap-2">
-                <span className="text-lg">🔴</span>
-                本日の連絡
-              </h3>
-              <div className="space-y-3">
-                {filteredAndSortedContacts
-                  .filter(c => {
-                    const today = new Date().toDateString();
-                    return new Date(c.deadline).toDateString() === today && c.status === 'pending' && !c.isOverdue;
-                  })
-                  .map(contact => (
-                    <div key={contact.id} className="bg-white rounded-lg sm:rounded-xl p-2.5 sm:p-3 shadow-sm sm:shadow-md hover:shadow-lg transition-all duration-200 border border-gray-100">
-                      <div className="flex items-start gap-2">
-                        <input
-                          type="checkbox"
-                          checked={contact.status === 'completed'}
-                          onChange={() => toggleComplete(contact.id)}
-                          className="mt-1 w-4 h-4 cursor-pointer"
-                        />
-                        <div className="flex-1">
-                          <h4 className="font-bold text-xs sm:text-sm text-navy-800">{contact.name}</h4>
-                          <p className="text-xs text-navy-600 mt-0.5 sm:mt-1 line-clamp-2">{contact.purpose}</p>
-                          <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold mt-2 ${getCategoryDisplay(contact.category).color}`}>
-                            {getCategoryDisplay(contact.category).label}
-                          </span>
-                          {contact.createdAt && (
-                            <p className="text-gray-400 text-xs mt-1">追加: {formatCreatedAt(contact.createdAt)}</p>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                {filteredAndSortedContacts.filter(c => {
-                  const today = new Date().toDateString();
-                  return new Date(c.deadline).toDateString() === today && c.status === 'pending' && !c.isOverdue;
-                }).length === 0 && (
-                  <div className="text-center py-8">
-                  <div className="text-red-300 text-4xl mb-2">🎆</div>
-                  <p className="text-red-400 font-medium">本日の連絡はありません</p>
-                </div>
-                )}
-              </div>
-            </div>
-
             {/* 期限切れ */}
-            <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-orange-200">
+            <div
+              className={`bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl sm:rounded-2xl p-3 sm:p-4 border-2 transition-all duration-200 ${
+                draggedContactId ? 'border-orange-300 border-dashed' : 'border-orange-200'
+              }`}
+              onDragOver={handleDragOver}
+              onDrop={(e) => handleDrop(e, 'overdue')}
+            >
               <h3 className="text-sm sm:text-base font-bold text-orange-800 mb-3 sm:mb-4 sticky top-0 bg-gradient-to-r from-orange-50 to-orange-100 py-2 rounded-lg flex items-center gap-2">
                 <span className="text-lg">⚠️</span>
                 期限切れ
+                {draggedContactId && <span className="text-xs font-normal ml-auto opacity-50">ドロップ不可</span>}
               </h3>
-              <div className="space-y-3">
+              <div className="space-y-3 min-h-[100px]">
                 {filteredAndSortedContacts
                   .filter(c => {
                     return c.isOverdue && c.status === 'pending';
                   })
                   .map(contact => (
-                    <div key={contact.id} className="bg-white rounded-lg sm:rounded-xl p-2.5 sm:p-3 shadow-sm sm:shadow-md hover:shadow-lg transition-all duration-200 border border-gray-100">
+                    <div
+                      key={contact.id}
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, contact.id)}
+                      onDragEnd={handleDragEnd}
+                      className={`bg-white rounded-lg sm:rounded-xl p-2.5 sm:p-3 shadow-sm sm:shadow-md hover:shadow-lg transition-all duration-200 border border-gray-100 cursor-grab active:cursor-grabbing ${
+                        draggedContactId === contact.id ? 'opacity-50 scale-95' : ''
+                      }`}
+                    >
                       <div className="flex items-start gap-2">
                         <input
                           type="checkbox"
@@ -1431,21 +1470,35 @@ export default function Home() {
               </div>
             </div>
 
-            {/* 今後の予定 */}
-            <div className="bg-gradient-to-br from-navy-50 to-navy-100 rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-navy-200">
-              <h3 className="text-sm sm:text-base font-bold text-navy-800 mb-3 sm:mb-4 sticky top-0 bg-gradient-to-r from-navy-50 to-navy-100 py-2 rounded-lg flex items-center gap-2">
-                <span className="text-lg">📅</span>
-                今後の予定
+            {/* 本日 */}
+            <div
+              className={`bg-gradient-to-br from-red-50 to-red-100 rounded-xl sm:rounded-2xl p-3 sm:p-4 border-2 transition-all duration-200 ${
+                draggedContactId ? 'border-red-400 border-dashed ring-2 ring-red-200' : 'border-red-200'
+              }`}
+              onDragOver={handleDragOver}
+              onDrop={(e) => handleDrop(e, 'today')}
+            >
+              <h3 className="text-sm sm:text-base font-bold text-red-800 mb-3 sm:mb-4 sticky top-0 bg-gradient-to-r from-red-50 to-red-100 py-2 rounded-lg flex items-center gap-2">
+                <span className="text-lg">🔴</span>
+                本日の連絡
+                {draggedContactId && <span className="text-xs font-normal ml-auto text-red-600">→ 期日を本日に</span>}
               </h3>
-              <div className="space-y-3">
+              <div className="space-y-3 min-h-[100px]">
                 {filteredAndSortedContacts
                   .filter(c => {
-                    const today = new Date();
-                    const deadline = new Date(c.deadline);
-                    return deadline > today && c.status === 'pending';
+                    const today = new Date().toDateString();
+                    return new Date(c.deadline).toDateString() === today && c.status === 'pending' && !c.isOverdue;
                   })
                   .map(contact => (
-                    <div key={contact.id} className="bg-white rounded-lg sm:rounded-xl p-2.5 sm:p-3 shadow-sm sm:shadow-md hover:shadow-lg transition-all duration-200 border border-gray-100">
+                    <div
+                      key={contact.id}
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, contact.id)}
+                      onDragEnd={handleDragEnd}
+                      className={`bg-white rounded-lg sm:rounded-xl p-2.5 sm:p-3 shadow-sm sm:shadow-md hover:shadow-lg transition-all duration-200 border border-gray-100 cursor-grab active:cursor-grabbing ${
+                        draggedContactId === contact.id ? 'opacity-50 scale-95' : ''
+                      }`}
+                    >
                       <div className="flex items-start gap-2">
                         <input
                           type="checkbox"
@@ -1456,19 +1509,76 @@ export default function Home() {
                         <div className="flex-1">
                           <h4 className="font-bold text-xs sm:text-sm text-navy-800">{contact.name}</h4>
                           <p className="text-xs text-navy-600 mt-0.5 sm:mt-1 line-clamp-2">{contact.purpose}</p>
-                          <p className="text-xs text-navy-700 font-bold mt-1">
+                          <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold mt-2 ${getCategoryDisplay(contact.category).color}`}>
+                            {getCategoryDisplay(contact.category).label}
+                          </span>
+                          {contact.createdAt && (
+                            <p className="text-gray-400 text-xs mt-1">追加: {formatCreatedAt(contact.createdAt)}</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                {filteredAndSortedContacts.filter(c => {
+                  const today = new Date().toDateString();
+                  return new Date(c.deadline).toDateString() === today && c.status === 'pending' && !c.isOverdue;
+                }).length === 0 && (
+                  <div className="text-center py-8">
+                  <div className="text-red-300 text-4xl mb-2">🎆</div>
+                  <p className="text-red-400 font-medium">本日の連絡はありません</p>
+                </div>
+                )}
+              </div>
+            </div>
+
+            {/* 今後の予定 */}
+            <div
+              className={`bg-gradient-to-br from-blue-50 to-indigo-100 rounded-xl sm:rounded-2xl p-3 sm:p-4 border-2 transition-all duration-200 ${
+                draggedContactId ? 'border-blue-400 border-dashed ring-2 ring-blue-200' : 'border-blue-200'
+              }`}
+              onDragOver={handleDragOver}
+              onDrop={(e) => handleDrop(e, 'future')}
+            >
+              <h3 className="text-sm sm:text-base font-bold text-blue-800 mb-3 sm:mb-4 sticky top-0 bg-gradient-to-r from-blue-50 to-indigo-100 py-2 rounded-lg flex items-center gap-2">
+                <span className="text-lg">📅</span>
+                今後の予定
+                {draggedContactId && <span className="text-xs font-normal ml-auto text-blue-600">→ 期日を明日に</span>}
+              </h3>
+              <div className="space-y-3 min-h-[100px]">
+                {filteredAndSortedContacts
+                  .filter(c => {
+                    const today = new Date();
+                    const deadline = new Date(c.deadline);
+                    return deadline > today && c.status === 'pending';
+                  })
+                  .map(contact => (
+                    <div
+                      key={contact.id}
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, contact.id)}
+                      onDragEnd={handleDragEnd}
+                      className={`bg-white rounded-lg sm:rounded-xl p-2.5 sm:p-3 shadow-sm sm:shadow-md hover:shadow-lg transition-all duration-200 border border-gray-100 cursor-grab active:cursor-grabbing ${
+                        draggedContactId === contact.id ? 'opacity-50 scale-95' : ''
+                      }`}
+                    >
+                      <div className="flex items-start gap-2">
+                        <input
+                          type="checkbox"
+                          checked={contact.status === 'completed'}
+                          onChange={() => toggleComplete(contact.id)}
+                          className="mt-1 w-4 h-4 cursor-pointer"
+                        />
+                        <div className="flex-1">
+                          <h4 className="font-bold text-xs sm:text-sm text-navy-800">{contact.name}</h4>
+                          <p className="text-xs text-navy-600 mt-0.5 sm:mt-1 line-clamp-2">{contact.purpose}</p>
+                          <p className="text-xs text-blue-700 font-bold mt-1">
                             {new Date(contact.deadline).toLocaleDateString('ja-JP')}
-                            {contact.isOverdue && contact.originalDeadline && (
-                              <span className="text-red-600 font-bold ml-1">
-                                (期日{new Date(contact.originalDeadline).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' })})
-                              </span>
-                            )}
                           </p>
                           <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold mt-2 ${getCategoryDisplay(contact.category).color}`}>
                             {getCategoryDisplay(contact.category).label}
                           </span>
                           {contact.recurring && (
-                            <span className="block text-xs text-navy-500 font-medium mt-1">
+                            <span className="block text-xs text-blue-500 font-medium mt-1">
                               🔄 {contact.recurring === 'daily' ? '毎日' :
                                   contact.recurring === 'weekly' ? '毎週' :
                                   contact.recurring === 'monthly' ? '毎月' : ''}
@@ -1487,8 +1597,8 @@ export default function Home() {
                   return deadline > today && c.status === 'pending';
                 }).length === 0 && (
                   <div className="text-center py-8">
-                  <div className="text-navy-300 text-4xl mb-2">😌</div>
-                  <p className="text-navy-400 font-medium">今後の予定はありません</p>
+                  <div className="text-blue-300 text-4xl mb-2">😌</div>
+                  <p className="text-blue-400 font-medium">今後の予定はありません</p>
                 </div>
                 )}
               </div>
