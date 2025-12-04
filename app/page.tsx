@@ -47,7 +47,7 @@ export default function Home() {
   const [editPurpose, setEditPurpose] = useState('');
   const [editDeadline, setEditDeadline] = useState('');
   const [editCategory, setEditCategory] = useState<string>('customer');
-  const [sortMode, setSortMode] = useState<'auto' | 'manual'>('auto');
+  const [sortMode, setSortMode] = useState<'auto' | 'manual' | 'created'>('auto');
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [history, setHistory] = useState<Contact[][]>([]);
@@ -706,6 +706,11 @@ export default function Home() {
       // 手動ソートモードの場合はスキップ
       if (sortMode === 'manual') return 0;
 
+      // 追加順ソートモードの場合
+      if (sortMode === 'created') {
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      }
+
       // ソートに使用する期日（期限切れの場合は元の期日、そうでなければ現在の期日）
       const getSortDate = (contact: Contact) => {
         return contact.isOverdue && contact.originalDeadline
@@ -736,6 +741,19 @@ export default function Home() {
     if (isToday) return `🔴 本日 ${formatted}`;
     if (isPast) return `⚠️ 期限切れ ${formatted}`;
     return formatted;
+  };
+
+  // 追加日時フォーマット
+  const formatCreatedAt = (createdAt: string) => {
+    if (!createdAt) return '';
+    const date = new Date(createdAt);
+    return date.toLocaleDateString('ja-JP', {
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   // カテゴリ表示用
@@ -937,10 +955,10 @@ export default function Home() {
                 {viewMode === 'list' ? '📊 ボード表示' : '📋 リスト表示'}
               </button>
               <button
-                onClick={() => setSortMode(sortMode === 'auto' ? 'manual' : 'auto')}
+                onClick={() => setSortMode(sortMode === 'auto' ? 'created' : sortMode === 'created' ? 'manual' : 'auto')}
                 className="px-3 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm bg-gradient-to-r from-purple-50 to-pink-50 text-purple-700 font-semibold rounded-xl sm:rounded-2xl hover:from-purple-100 hover:to-pink-100 transition-all duration-200 border border-purple-200/50"
               >
-                {sortMode === 'auto' ? '🔄 手動ソート' : '⚡ 自動ソート'}
+                {sortMode === 'auto' ? '⚡ 期日順' : sortMode === 'created' ? '🕐 追加順' : '✋ 手動'}
               </button>
               <div className="flex items-center gap-1">
                 <button
@@ -1095,6 +1113,11 @@ export default function Home() {
                           </span>
                         </div>
                         <p className="text-gray-600 text-xs sm:text-sm lg:text-base leading-relaxed mt-1.5 sm:mt-2">{contact.purpose}</p>
+                        {contact.createdAt && (
+                          <p className="text-gray-400 text-xs mt-1">
+                            追加: {formatCreatedAt(contact.createdAt)}
+                          </p>
+                        )}
 
                         {/* アクションボタン */}
                         <div className="flex gap-1.5 mt-2">
@@ -1337,6 +1360,9 @@ export default function Home() {
                           <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold mt-2 ${getCategoryDisplay(contact.category).color}`}>
                             {getCategoryDisplay(contact.category).label}
                           </span>
+                          {contact.createdAt && (
+                            <p className="text-gray-400 text-xs mt-1">追加: {formatCreatedAt(contact.createdAt)}</p>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -1387,6 +1413,9 @@ export default function Home() {
                           <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold mt-2 ${getCategoryDisplay(contact.category).color}`}>
                             {getCategoryDisplay(contact.category).label}
                           </span>
+                          {contact.createdAt && (
+                            <p className="text-gray-400 text-xs mt-1">追加: {formatCreatedAt(contact.createdAt)}</p>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -1444,6 +1473,9 @@ export default function Home() {
                                   contact.recurring === 'weekly' ? '毎週' :
                                   contact.recurring === 'monthly' ? '毎月' : ''}
                             </span>
+                          )}
+                          {contact.createdAt && (
+                            <p className="text-gray-400 text-xs mt-1">追加: {formatCreatedAt(contact.createdAt)}</p>
                           )}
                         </div>
                       </div>
