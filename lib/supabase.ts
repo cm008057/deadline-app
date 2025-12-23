@@ -28,6 +28,7 @@ export interface DbContact {
   deadline: string;
   status: 'pending' | 'completed';
   category?: string;
+  priority?: 'A' | 'B' | 'C';
   recurring?: string;
   recurring_days?: number;
   recurring_weekday?: number;

@@ -8,6 +8,8 @@ import type { User } from '@supabase/supabase-js';
 type ContactStatus = 'pending' | 'completed';
 type ContactCategory = string;
 
+type ContactPriority = 'A' | 'B' | 'C';
+
 interface Contact {
   id: string;
   name: string;
@@ -15,6 +17,7 @@ interface Contact {
   deadline: string;
   status: ContactStatus;
   category: ContactCategory;
+  priority?: ContactPriority; // 優先度 A > B > C
   customCategory?: string; // カスタムカテゴリー名
   createdAt: string;
   completedAt?: string;
@@ -47,12 +50,16 @@ export default function Home() {
   const [editPurpose, setEditPurpose] = useState('');
   const [editDeadline, setEditDeadline] = useState('');
   const [editCategory, setEditCategory] = useState<string>('customer');
-  const [sortMode, setSortMode] = useState<'auto' | 'manual' | 'created'>('auto');
+  const [editPriority, setEditPriority] = useState<ContactPriority>('C');
+  const [priority, setPriority] = useState<ContactPriority>('C');
+  const [sortMode, setSortMode] = useState<'auto' | 'manual' | 'created' | 'priority'>('priority');
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [history, setHistory] = useState<Contact[][]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [draggedContactId, setDraggedContactId] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set()); // 一括選択用
+  const [bulkSelectMode, setBulkSelectMode] = useState(false); // 一括選択モード
   const router = useRouter();
 
   // カスタムカテゴリを抽出する関数
@@ -173,6 +180,7 @@ export default function Home() {
           deadline: dbContact.deadline,
           status: dbContact.status,
           category: dbContact.category || 'customer',
+          priority: dbContact.priority || 'C',
           createdAt: dbContact.created_at || '',
           completedAt: dbContact.completed_at || undefined,
           recurring: dbContact.recurring
@@ -227,6 +235,7 @@ export default function Home() {
           deadline: dbContact.deadline,
           status: dbContact.status,
           category: dbContact.category || 'customer',
+          priority: dbContact.priority || 'C',
           createdAt: dbContact.created_at || '',
           completedAt: dbContact.completed_at || undefined,
           recurring: dbContact.recurring
@@ -248,6 +257,7 @@ export default function Home() {
           deadline: dbContact.deadline,
           status: dbContact.status,
           category: dbContact.category || 'customer',
+          priority: dbContact.priority || 'C',
           createdAt: dbContact.created_at || '',
           completedAt: dbContact.completed_at || undefined,
           recurring: dbContact.recurring
@@ -400,6 +410,7 @@ export default function Home() {
     setEditPurpose(contact.purpose);
     setEditDeadline(contact.deadline);
     setEditCategory(contact.category);
+    setEditPriority(contact.priority || 'C');
   };
 
   // 編集保存
@@ -414,13 +425,14 @@ export default function Home() {
         name: editName,
         purpose: editPurpose,
         deadline: editDeadline,
-        category: editCategory
+        category: editCategory,
+        priority: editPriority
       });
     }
 
     const updatedContacts = contacts.map(c =>
       c.id === id
-        ? { ...c, name: editName, purpose: editPurpose, deadline: editDeadline, category: editCategory, isOverdue: false, originalDeadline: undefined }
+        ? { ...c, name: editName, purpose: editPurpose, deadline: editDeadline, category: editCategory, priority: editPriority, isOverdue: false, originalDeadline: undefined }
         : c
     );
     // 期限切れチェック
@@ -436,6 +448,7 @@ export default function Home() {
     setEditPurpose('');
     setEditDeadline('');
     setEditCategory('customer');
+    setEditPriority('C');
   };
 
   // 削除
@@ -446,6 +459,59 @@ export default function Home() {
       await contactsApi.delete(id);
     }
     setContacts(contacts.filter(c => c.id !== id));
+  };
+
+  // 一括選択の切り替え
+  const toggleSelect = (id: string) => {
+    const newSelected = new Set(selectedIds);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
+    }
+    setSelectedIds(newSelected);
+  };
+
+  // 全選択/全解除
+  const toggleSelectAll = () => {
+    if (selectedIds.size === filteredAndSortedContacts.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filteredAndSortedContacts.map(c => c.id)));
+    }
+  };
+
+  // 一括優先度設定
+  const bulkSetPriority = async (newPriority: ContactPriority) => {
+    if (selectedIds.size === 0) {
+      alert('連絡先を選択してください');
+      return;
+    }
+
+    setLoading(true);
+
+    // 履歴を保存
+    saveToHistory(contacts);
+
+    const updatedContacts = contacts.map(contact => {
+      if (selectedIds.has(contact.id)) {
+        return { ...contact, priority: newPriority };
+      }
+      return contact;
+    });
+
+    // データベースを更新
+    if (useDatabase) {
+      for (const id of selectedIds) {
+        await contactsApi.update(id, { priority: newPriority });
+      }
+    }
+
+    setContacts(updatedContacts);
+    setSelectedIds(new Set());
+    setBulkSelectMode(false);
+    setLoading(false);
+    alert(`${selectedIds.size}件の優先度を ${newPriority} に設定しました`);
   };
 
   // 期限切れを一括で本日に更新
@@ -543,6 +609,7 @@ export default function Home() {
         deadline,
         status: 'pending',
         category: finalCategory,
+        priority,
         user_id: user?.id
       });
 
@@ -554,6 +621,7 @@ export default function Home() {
           deadline: dbContact.deadline,
           status: dbContact.status,
           category: dbContact.category || 'customer',
+          priority: dbContact.priority || 'C',
           customCategory: category === 'other' ? customCategory : undefined,
           createdAt: dbContact.created_at || '',
           completedAt: dbContact.completed_at || undefined,
@@ -572,6 +640,7 @@ export default function Home() {
         deadline,
         status: 'pending',
         category: finalCategory,
+        priority,
         customCategory: category === 'other' ? customCategory : undefined,
         createdAt: new Date().toISOString(),
       };
@@ -584,6 +653,7 @@ export default function Home() {
     setPurpose('');
     setDeadline('');
     setCategory('customer');
+    setPriority('C');
     setCustomCategory('');
     setShowCustomInput(false);
     setLoading(false);
@@ -683,6 +753,16 @@ export default function Home() {
     setEditingId(null);
   };
 
+  // 優先度の数値変換（A=1, B=2, C=3）
+  const getPriorityValue = (priority?: ContactPriority): number => {
+    switch (priority) {
+      case 'A': return 1;
+      case 'B': return 2;
+      case 'C': return 3;
+      default: return 3; // 未設定はCと同じ
+    }
+  };
+
   // フィルタリングとソート
   const filteredAndSortedContacts = [...contacts]
     .sort((a, b) => {
@@ -722,7 +802,15 @@ export default function Home() {
       const aSortDate = getSortDate(a);
       const bSortDate = getSortDate(b);
 
-      // 期日順（期限切れも元の期日で並ぶ、完了済みも同じ位置に残る）
+      // 優先度順モードの場合：優先度 > 期日
+      if (sortMode === 'priority') {
+        const priorityDiff = getPriorityValue(a.priority) - getPriorityValue(b.priority);
+        if (priorityDiff !== 0) return priorityDiff;
+        // 優先度が同じ場合は期日順
+        return new Date(aSortDate).getTime() - new Date(bSortDate).getTime();
+      }
+
+      // 期日順（auto）：期限切れも元の期日で並ぶ、完了済みも同じ位置に残る
       return new Date(aSortDate).getTime() - new Date(bSortDate).getTime();
     });
 
@@ -961,7 +1049,16 @@ export default function Home() {
                 className="w-full px-3 py-2 sm:px-3 sm:py-2.5 lg:py-2 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all text-xs sm:text-sm lg:text-sm text-gray-800"
               />
             </div>
-            <div className="lg:col-span-2 flex gap-2">
+            <div className="flex gap-2">
+              <select
+                value={priority}
+                onChange={(e) => setPriority(e.target.value as ContactPriority)}
+                className="w-24 px-3 py-2 sm:px-3 sm:py-2.5 lg:py-2 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all text-xs sm:text-sm lg:text-sm text-gray-800 appearance-none cursor-pointer font-bold"
+              >
+                <option value="A">🔴 A</option>
+                <option value="B">🟡 B</option>
+                <option value="C">🟢 C</option>
+              </select>
               <select
                 value={category}
                 onChange={(e) => {
@@ -1033,10 +1130,23 @@ export default function Home() {
                 {viewMode === 'list' ? '📊 ボード表示' : '📋 リスト表示'}
               </button>
               <button
-                onClick={() => setSortMode(sortMode === 'auto' ? 'created' : sortMode === 'created' ? 'manual' : 'auto')}
+                onClick={() => setSortMode(sortMode === 'priority' ? 'auto' : sortMode === 'auto' ? 'created' : sortMode === 'created' ? 'manual' : 'priority')}
                 className="px-3 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm bg-gradient-to-r from-purple-50 to-pink-50 text-purple-700 font-semibold rounded-xl sm:rounded-2xl hover:from-purple-100 hover:to-pink-100 transition-all duration-200 border border-purple-200/50"
               >
-                {sortMode === 'auto' ? '⚡ 期日順' : sortMode === 'created' ? '🕐 追加順' : '✋ 手動'}
+                {sortMode === 'priority' ? '🎯 優先度順' : sortMode === 'auto' ? '⚡ 期日順' : sortMode === 'created' ? '🕐 追加順' : '✋ 手動'}
+              </button>
+              <button
+                onClick={() => {
+                  setBulkSelectMode(!bulkSelectMode);
+                  if (bulkSelectMode) setSelectedIds(new Set());
+                }}
+                className={`px-3 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm font-semibold rounded-xl sm:rounded-2xl transition-all duration-200 border ${
+                  bulkSelectMode
+                    ? 'bg-gradient-to-r from-amber-400 to-orange-400 text-white border-amber-300 shadow-lg'
+                    : 'bg-gradient-to-r from-amber-50 to-orange-50 text-amber-700 border-amber-200/50 hover:from-amber-100 hover:to-orange-100'
+                }`}
+              >
+                {bulkSelectMode ? '✅ 選択モード中' : '☑️ 一括選択'}
               </button>
               <div className="flex items-center gap-1">
                 <button
@@ -1088,6 +1198,49 @@ export default function Home() {
           </div>
         </div>
 
+        {/* 一括優先度設定パネル */}
+        {bulkSelectMode && (
+          <div className="bg-gradient-to-r from-amber-50 to-orange-50 backdrop-blur-lg rounded-2xl sm:rounded-3xl shadow-lg border-2 border-amber-300 p-3 sm:p-4 lg:p-5 mb-4 sm:mb-6">
+            <div className="flex flex-wrap gap-3 items-center justify-between">
+              <div className="flex items-center gap-3">
+                <span className="text-sm sm:text-base font-bold text-amber-800">
+                  📋 {selectedIds.size}件選択中
+                </span>
+                <button
+                  onClick={toggleSelectAll}
+                  className="px-3 py-1.5 text-xs sm:text-sm bg-white text-amber-700 font-semibold rounded-lg hover:bg-amber-100 transition-all duration-200 border border-amber-300"
+                >
+                  {selectedIds.size === filteredAndSortedContacts.length ? '全解除' : '全選択'}
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-2 items-center">
+                <span className="text-sm font-medium text-amber-700">優先度を設定:</span>
+                <button
+                  onClick={() => bulkSetPriority('A')}
+                  disabled={loading || selectedIds.size === 0}
+                  className="px-4 py-2 text-sm font-black bg-red-500 text-white rounded-xl hover:bg-red-600 transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  🔴 A
+                </button>
+                <button
+                  onClick={() => bulkSetPriority('B')}
+                  disabled={loading || selectedIds.size === 0}
+                  className="px-4 py-2 text-sm font-black bg-yellow-400 text-gray-800 rounded-xl hover:bg-yellow-500 transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  🟡 B
+                </button>
+                <button
+                  onClick={() => bulkSetPriority('C')}
+                  disabled={loading || selectedIds.size === 0}
+                  className="px-4 py-2 text-sm font-black bg-green-500 text-white rounded-xl hover:bg-green-600 transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  🟢 C
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* リスト表示 */}
         {viewMode === 'list' ? (
           <div className="space-y-2 sm:space-y-3">
@@ -1101,10 +1254,18 @@ export default function Home() {
               </div>
             ) : (
             filteredAndSortedContacts.map((contact) => (
-              <div key={contact.id} className={`group bg-white rounded-lg sm:rounded-xl shadow-sm sm:shadow-md border border-gray-100 p-3 sm:p-3.5 lg:p-4 sm:hover:shadow-lg transition-all duration-300 sm:hover:-translate-y-0.5 ${
-                contact.status === 'completed' ? 'opacity-50 bg-gray-50/50' : ''
-              }`}>
+              <div key={contact.id} className={`group bg-white rounded-lg sm:rounded-xl shadow-sm sm:shadow-md border p-3 sm:p-3.5 lg:p-4 sm:hover:shadow-lg transition-all duration-300 sm:hover:-translate-y-0.5 ${
+                contact.status === 'completed' ? 'opacity-50 bg-gray-50/50 border-gray-100' : ''
+              } ${bulkSelectMode && selectedIds.has(contact.id) ? 'border-amber-400 bg-amber-50/50 ring-2 ring-amber-200' : 'border-gray-100'}`}>
                 <div className="flex items-start gap-3">
+                  {bulkSelectMode && (
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.has(contact.id)}
+                      onChange={() => toggleSelect(contact.id)}
+                      className="mt-0.5 w-5 h-5 lg:w-6 lg:h-6 cursor-pointer accent-amber-500"
+                    />
+                  )}
                   <input
                     type="checkbox"
                     checked={contact.status === 'completed'}
@@ -1131,13 +1292,22 @@ export default function Home() {
                             placeholder="目的"
                           />
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                           <input
                             type="date"
                             value={editDeadline}
                             onChange={(e) => setEditDeadline(e.target.value)}
                             className="px-3 py-2 border-2 border-navy-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-navy-500 focus:border-navy-500 transition-all"
                           />
+                          <select
+                            value={editPriority}
+                            onChange={(e) => setEditPriority(e.target.value as ContactPriority)}
+                            className="px-3 py-2 border-2 border-navy-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-navy-500 focus:border-navy-500 transition-all font-bold"
+                          >
+                            <option value="A">🔴 優先度 A</option>
+                            <option value="B">🟡 優先度 B</option>
+                            <option value="C">🟢 優先度 C</option>
+                          </select>
                           <select
                             value={editCategory}
                             onChange={(e) => setEditCategory(e.target.value)}
@@ -1171,6 +1341,13 @@ export default function Home() {
                       <>
                         <div className="flex items-center gap-3 mb-2 flex-wrap">
                           <h3 className="text-base sm:text-lg lg:text-xl font-bold text-gray-800">{contact.name}</h3>
+                          <span className={`inline-flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 rounded-full text-xs font-black shadow-sm ${
+                            contact.priority === 'A' ? 'bg-red-500 text-white' :
+                            contact.priority === 'B' ? 'bg-yellow-400 text-gray-800' :
+                            'bg-green-500 text-white'
+                          }`}>
+                            {contact.priority || 'C'}
+                          </span>
                           <span className={`inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-xs font-semibold ${getCategoryDisplay(contact.category).color} shadow-sm`}>
                             <span>{getCategoryDisplay(contact.category).emoji}</span>
                             <span>{getCategoryDisplay(contact.category).label}</span>
@@ -1450,7 +1627,16 @@ export default function Home() {
                           className="mt-1 w-4 h-4 cursor-pointer"
                         />
                         <div className="flex-1">
-                          <h4 className="font-bold text-xs sm:text-sm text-navy-800">{contact.name}</h4>
+                          <div className="flex items-center gap-2 mb-1">
+                            <h4 className="font-bold text-xs sm:text-sm text-navy-800">{contact.name}</h4>
+                            <span className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-xs font-black ${
+                              contact.priority === 'A' ? 'bg-red-500 text-white' :
+                              contact.priority === 'B' ? 'bg-yellow-400 text-gray-800' :
+                              'bg-green-500 text-white'
+                            }`}>
+                              {contact.priority || 'C'}
+                            </span>
+                          </div>
                           <p className="text-xs text-navy-600 mt-0.5 sm:mt-1 line-clamp-2">{contact.purpose}</p>
                           <p className="text-xs text-orange-700 font-bold mt-1">
                             {new Date(contact.deadline).toLocaleDateString('ja-JP')}
@@ -1521,7 +1707,16 @@ export default function Home() {
                           className="mt-1 w-4 h-4 cursor-pointer"
                         />
                         <div className="flex-1">
-                          <h4 className="font-bold text-xs sm:text-sm text-navy-800">{contact.name}</h4>
+                          <div className="flex items-center gap-2 mb-1">
+                            <h4 className="font-bold text-xs sm:text-sm text-navy-800">{contact.name}</h4>
+                            <span className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-xs font-black ${
+                              contact.priority === 'A' ? 'bg-red-500 text-white' :
+                              contact.priority === 'B' ? 'bg-yellow-400 text-gray-800' :
+                              'bg-green-500 text-white'
+                            }`}>
+                              {contact.priority || 'C'}
+                            </span>
+                          </div>
                           <p className="text-xs text-navy-600 mt-0.5 sm:mt-1 line-clamp-2">{contact.purpose}</p>
                           <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold mt-2 ${getCategoryDisplay(contact.category).color}`}>
                             {getCategoryDisplay(contact.category).label}
@@ -1586,7 +1781,16 @@ export default function Home() {
                           className="mt-1 w-4 h-4 cursor-pointer"
                         />
                         <div className="flex-1">
-                          <h4 className="font-bold text-xs sm:text-sm text-navy-800">{contact.name}</h4>
+                          <div className="flex items-center gap-2 mb-1">
+                            <h4 className="font-bold text-xs sm:text-sm text-navy-800">{contact.name}</h4>
+                            <span className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-xs font-black ${
+                              contact.priority === 'A' ? 'bg-red-500 text-white' :
+                              contact.priority === 'B' ? 'bg-yellow-400 text-gray-800' :
+                              'bg-green-500 text-white'
+                            }`}>
+                              {contact.priority || 'C'}
+                            </span>
+                          </div>
                           <p className="text-xs text-navy-600 mt-0.5 sm:mt-1 line-clamp-2">{contact.purpose}</p>
                           <p className="text-xs text-blue-700 font-bold mt-1">
                             {new Date(contact.deadline).toLocaleDateString('ja-JP')}
