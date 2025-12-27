@@ -40,14 +40,14 @@ export async function GET(request: Request) {
     console.log('All contacts sample:', allContacts);
     console.log('All contacts error:', allError);
 
-    // 当日期日 & 優先度A/B & 未完了のcontactsを取得
+    // 当日期日 & 優先度A & 未完了のcontactsを取得
     const { data: contacts, error } = await supabase
       .from('contacts')
       .select('*')
       .eq('deadline', todayStr)
       .eq('status', 'pending')
-      .in('priority', ['A', 'B'])
-      .order('priority', { ascending: true });
+      .eq('priority', 'A')
+      .order('name', { ascending: true });
 
     if (error) {
       console.error('Supabase error:', error);
@@ -72,29 +72,14 @@ export async function GET(request: Request) {
     }
 
     // Slackメッセージを作成
-    const priorityA = contacts.filter(c => c.priority === 'A');
-    const priorityB = contacts.filter(c => c.priority === 'B');
-
     let message = `📅 *本日の期日* (${todayStr})\n\n`;
+    message += `🔴 *【優先度A】* ${contacts.length}件\n\n`;
 
-    if (priorityA.length > 0) {
-      message += `🔴 *【優先度A】*\n`;
-      priorityA.forEach(c => {
-        message += `• ${c.name} - ${c.purpose}\n`;
-      });
-      message += '\n';
-    }
+    contacts.forEach(c => {
+      message += `• ${c.name} - ${c.purpose}\n`;
+    });
 
-    if (priorityB.length > 0) {
-      message += `🟡 *【優先度B】*\n`;
-      priorityB.forEach(c => {
-        message += `• ${c.name} - ${c.purpose}\n`;
-      });
-      message += '\n';
-    }
-
-    message += `━━━━━━━━━━━━━━━━━━\n`;
-    message += `合計: ${contacts.length}件`;
+    message += `\n━━━━━━━━━━━━━━━━━━`;
 
     // Slackに送信
     const slackResponse = await fetch(SLACK_WEBHOOK_URL, {
