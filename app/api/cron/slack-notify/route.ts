@@ -31,6 +31,15 @@ export async function GET(request: Request) {
     
     console.log('Today (JST):', todayStr);
 
+    // まず全データを取得してデバッグ
+    const { data: allContacts, error: allError } = await supabase
+      .from('contacts')
+      .select('name, deadline, priority, status')
+      .limit(5);
+    
+    console.log('All contacts sample:', allContacts);
+    console.log('All contacts error:', allError);
+
     // 当日期日 & 優先度A/B & 未完了のcontactsを取得
     const { data: contacts, error } = await supabase
       .from('contacts')
@@ -42,7 +51,7 @@ export async function GET(request: Request) {
 
     if (error) {
       console.error('Supabase error:', error);
-      return NextResponse.json({ error: 'Database error', details: error.message }, { status: 500 });
+      return NextResponse.json({ error: 'Database error', details: error.message, allSample: allContacts }, { status: 500 });
     }
 
     console.log('Found contacts:', contacts?.length || 0);
@@ -50,7 +59,16 @@ export async function GET(request: Request) {
     // 通知するcontactsがない場合
     if (!contacts || contacts.length === 0) {
       console.log('No contacts to notify for today');
-      return NextResponse.json({ message: 'No contacts to notify', date: todayStr, debug: { supabaseUrl: !!supabaseUrl, serviceKey: !!supabaseServiceKey } });
+      return NextResponse.json({ 
+        message: 'No contacts to notify', 
+        date: todayStr, 
+        debug: { 
+          supabaseUrl: !!supabaseUrl, 
+          serviceKey: !!supabaseServiceKey,
+          allSample: allContacts,
+          allError: allError?.message
+        } 
+      });
     }
 
     // Slackメッセージを作成
