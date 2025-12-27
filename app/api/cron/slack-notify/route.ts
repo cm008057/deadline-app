@@ -21,10 +21,15 @@ export async function GET(request: Request) {
 
   try {
     // 今日の日付を取得（日本時間）
-    const today = new Date();
-    const jstOffset = 9 * 60; // JST is UTC+9
-    const jstDate = new Date(today.getTime() + (jstOffset + today.getTimezoneOffset()) * 60000);
-    const todayStr = jstDate.toISOString().split('T')[0];
+    const now = new Date();
+    // 日本時間に変換
+    const jstNow = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
+    const year = jstNow.getFullYear();
+    const month = String(jstNow.getMonth() + 1).padStart(2, '0');
+    const day = String(jstNow.getDate()).padStart(2, '0');
+    const todayStr = `${year}-${month}-${day}`;
+    
+    console.log('Today (JST):', todayStr);
 
     // 当日期日 & 優先度A/B & 未完了のcontactsを取得
     const { data: contacts, error } = await supabase
@@ -37,13 +42,15 @@ export async function GET(request: Request) {
 
     if (error) {
       console.error('Supabase error:', error);
-      return NextResponse.json({ error: 'Database error' }, { status: 500 });
+      return NextResponse.json({ error: 'Database error', details: error.message }, { status: 500 });
     }
+
+    console.log('Found contacts:', contacts?.length || 0);
 
     // 通知するcontactsがない場合
     if (!contacts || contacts.length === 0) {
       console.log('No contacts to notify for today');
-      return NextResponse.json({ message: 'No contacts to notify', date: todayStr });
+      return NextResponse.json({ message: 'No contacts to notify', date: todayStr, debug: { supabaseUrl: !!supabaseUrl, serviceKey: !!supabaseServiceKey } });
     }
 
     // Slackメッセージを作成
